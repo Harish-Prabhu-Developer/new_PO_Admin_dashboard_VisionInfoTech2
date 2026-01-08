@@ -4,6 +4,7 @@ import {
   LogIn,
   Lock,
   User,
+  Loader,
 } from "lucide-react";
 import React, { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -189,11 +190,11 @@ const LoginPage = () => {
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                  <Loader className="animate-spin  h-5 w-5 border-white mr-3"/>
                   Authenticating...
                 </>
               ) : (
-                "Sign In to Admin"
+                "Login"
               )}
             </button>
 

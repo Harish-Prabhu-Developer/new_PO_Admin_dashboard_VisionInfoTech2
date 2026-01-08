@@ -39,7 +39,7 @@ const DashboardPage = () => {
       .replace(/\s+/g, '-')          // Replace spaces with hyphens
       .replace(/-+/g, '-');          // Replace multiple hyphens with single
     
-    navigate(`/approval-details/${urlFriendlyTitle}`, { 
+    navigate(`/${urlFriendlyTitle}`, { 
       state: { cardData: card } 
     });
   };

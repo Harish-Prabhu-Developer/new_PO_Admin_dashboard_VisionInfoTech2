@@ -4,7 +4,7 @@ export const Auth_RESPONSE_STRUCTURE =
     "Sno": "14",
     "New_Card_no": "28352",
     "Emp_Name ": "Harish",
-    "User_Approval_Name": "Harish",
+    "User_Approval_Name": "admin",
     "signature": "picture file for sign",
     "Email_Address": "Harish@atoz.co.tz",
     "Company_Id": "28",

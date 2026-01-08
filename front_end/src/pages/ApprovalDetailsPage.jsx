@@ -268,38 +268,24 @@ const ApprovalDetailsPage = () => {
 
   const handleViewDetails = (row) => {
     console.log("Viewing details for:", row);
-    // You can:
-    // 1. Open a modal with detailed information
-    // 2. Navigate to a details page
-    // 3. Show a drawer/side panel with details
     
-    // Example: Open a modal
-    alert(`Viewing details for PO: ${row.poNo}\nSupplier: ${row.supplier}\nAmount: ${row.amount} ${row.currency}`);
-    
-    // Example: Navigate to details page
-    // navigate(`/approval-details/${approvalType}/${row.id}`, { state: { rowData: row } });
+    // Navigate to details page
+    navigate(`/${approvalType}/${row.id}`, { 
+      state: { 
+        rowData: row,
+        cardData: cardData
+      } 
+    });
   };
 
   // Count active filters
   const activeFilterCount = Object.values(filters).filter(val => val && val !== "").length;
 
   return (
-    <div className="min-h-screen bg-slate-50 px-2 py-4">
+    <div className="min-h-screen bg-slate-50">
       <div className="w-full space-y-6">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-lg md:text-2xl font-semibold text-gray-900">
-              Pending {pageTitle} Details
-            </h1>
-            {activeFilterCount > 0 && (
-              <p className="text-sm text-gray-600 mt-1">
-                {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} active • Showing {filteredData.length} of {mockTableData.length} records
-              </p>
-            )}
-          </div>
-        </div>
-
+        {/* Page Header - Removed duplicate header since Layout handles it */}
+        
         {/* Filter Form */}
         <FilterForm
           filters={filters}
@@ -321,6 +307,34 @@ const ApprovalDetailsPage = () => {
           pagination={true}
           itemsPerPage={10}
         />
+
+        {/* Stats Summary */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-gray-600">Total Records</div>
+              <div className="text-2xl font-bold text-blue-600">{mockTableData.length}</div>
+            </div>
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="text-sm text-gray-600">Approved</div>
+              <div className="text-2xl font-bold text-green-600">
+                {mockTableData.filter(item => item.finalStatus === 'APPROVED').length}
+              </div>
+            </div>
+            <div className="text-center p-3 bg-yellow-50 rounded-lg">
+              <div className="text-sm text-gray-600">Pending</div>
+              <div className="text-2xl font-bold text-yellow-600">
+                {mockTableData.filter(item => !item.finalStatus || item.finalStatus === 'PENDING').length}
+              </div>
+            </div>
+            <div className="text-center p-3 bg-red-50 rounded-lg">
+              <div className="text-sm text-gray-600">On Hold</div>
+              <div className="text-2xl font-bold text-red-600">
+                {mockTableData.filter(item => item.finalStatus === 'HOLD').length}
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>

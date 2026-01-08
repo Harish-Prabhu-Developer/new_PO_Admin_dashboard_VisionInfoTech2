@@ -3,6 +3,7 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ApprovalDetailsPage from './pages/ApprovalDetailsPage';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import ViewDetailPage from './pages/ViewDetailPage';
 
 function ProtectedRoute() {
   const token = localStorage.getItem('tbgs_access_token');
@@ -28,7 +29,8 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<DashboardPage />} />
             {/* Dynamic route with approval type parameter */}
-            <Route path="/approval-details/:approvalType" element={<ApprovalDetailsPage />} />
+            <Route path="/:approvalType" element={<ApprovalDetailsPage />} />
+            <Route path="/:approvalType/:id" element={<ViewDetailPage />} />
             {/* Add more nested pages below */}
           </Route>
         </Route>
