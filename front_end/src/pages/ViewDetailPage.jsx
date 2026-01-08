@@ -95,18 +95,7 @@ const ViewDetailPage = () => {
       onClick: () => console.log("Download PO", rowData.poNo),
       variant: "outline"
     },
-    {
-      label: "Print",
-      icon: <Printer className="w-4 h-4" />,
-      onClick: () => window.print(),
-      variant: "outline"
-    },
-    {
-      label: "Share",
-      icon: <Share2 className="w-4 h-4" />,
-      onClick: () => console.log("Share", rowData.poNo),
-      variant: "outline"
-    }
+    
   ];
 
   // Main details sections
