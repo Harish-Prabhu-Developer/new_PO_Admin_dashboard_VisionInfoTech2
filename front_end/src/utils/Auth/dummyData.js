@@ -38,3 +38,28 @@ export const Auth_RESPONSE_STRUCTURE =
     "BoncePurchaseOrder_Approval_YN": "YES",
     "BondReleaseRequest_Approval_YN": "YES"
   }
+  export const API_RESPONSE_SIMPLE_DATA=[
+    { id: 1, title: "PO Approval", value: 0},
+    { id: 2, title: "Cash Advance Approval", value: 10},
+    { id: 3, title: "Credit Limit Approval", value: 5},
+    { id: 4, title: "Price Approval", value: 8},
+    { id: 5, title: "Goods Request Approval", value: 2},
+    { id: 6, title: "Inter-company Approval", value: 4},
+    { id: 7, title: "Sales Return Approval", value: 1},
+    { id: 8, title: "Gate Pass Approval", value: 3},
+    { id: 9, title: "Product Creation Approval", value: 6},
+    { id: 10, title: "Customer Creation Approval", value: 7},
+    { id: 11, title: "Wastage Delivery Approval", value: 9 },
+    { id: 12, title: "Work Order Approval", value: 11},
+    { id: 13, title: "PFL Work Order Approval", value: 12},
+    { id: 14, title: "PPRB Roll Cutt Templates", value: 13},
+    { id: 15, title: "Expat Travel Leave Approval", value: 14},
+    { id: 16, title: "SALES PI Approval", value: 15},
+    { id: 17, title: "PURCHASE PI Approval", value: 16},
+    { id: 18, title: "Apparels Dashboard", value: 17},
+    { id: 19, title: "PO Approval Head", value: 18},
+    { id: 20, title: "Overtime Approval", value: 19},
+    { id: 21, title: "Expat Leave Encashment", value: 20},
+    { id: 22, title: "Bonce Purchase Order Approval", value: 21},
+    { id: 23, title: "Bond Release Request Approval", value: 22},
+  ];

@@ -11,7 +11,8 @@ import toast from "react-hot-toast";
 import { decryptData, encryptData } from "../utils/cryptoUtils";
 import { useNavigate } from "react-router-dom";
 import { Auth_RESPONSE_STRUCTURE } from "../utils/Auth/dummyData";
-
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/Slice/SidebarMenu";
 const LoginPage = () => {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +22,7 @@ const LoginPage = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   /**
    * Prefill username/password ONLY if Remember Me data exists
@@ -75,6 +77,8 @@ const LoginPage = () => {
           "tbgs_access_token",
           JSON.stringify(Auth_RESPONSE_STRUCTURE)
         );
+          // Dispatch user data to Redux store
+        dispatch(setUserData(Auth_RESPONSE_STRUCTURE));
 
         // Save credentials only if Remember Me is checked
         if (rememberMe) {

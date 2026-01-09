@@ -6,3 +6,78 @@ body {
   font-family: 'Poppins', 'Inter', 'Roboto', sans-serif;
 }
 
+
+/* Premium Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-gutter: stable;
+}
+
+/* Webkit (Chrome, Edge, Safari) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* Ultra thin */
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1); /* Almost invisible */
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+/* Show scrollbar on hover */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+
+.custom-scrollbar:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Content Area Scrollbar (Dark for Light Backgrounds) */
+.content-scrollbar {
+  scrollbar-gutter: stable;
+}
+
+.content-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.content-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.content-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(79, 70, 229, 0.1); /* Subtle indigo */
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+
+.content-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(79, 70, 229, 0.3);
+}
+
+.content-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(79, 70, 229, 0.5);
+}
+
+/* Firefox */
+.content-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 70, 229, 0.2) transparent;
+}

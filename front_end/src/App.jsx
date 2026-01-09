@@ -1,45 +1,64 @@
-import Layout from './pages/Layout';
-import DashboardPage from './pages/DashboardPage';
-import LoginPage from './pages/LoginPage';
-import ApprovalDetailsPage from './pages/ApprovalDetailsPage';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import ViewDetailPage from './pages/ViewDetailPage';
+// src/App.jsx
+import { useEffect } from "react";
+import Layout from "./pages/Layout";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import ApprovalDetailsPage from "./pages/ApprovalDetailsPage";
+import ViewDetailPage from "./pages/ViewDetailPage";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
+
+/* -------------------- Route Guards -------------------- */
 
 function ProtectedRoute() {
-  const token = localStorage.getItem('tbgs_access_token');
-  return token ? <Outlet /> : <Navigate to="/login" replace />;
+  const token = localStorage.getItem("tbgs_access_token");
+
+  if (!token || token === "null" || token.trim() === "") {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 }
 
 function PublicRoute() {
-  const token = localStorage.getItem('tbgs_access_token');
-  return token ? <Navigate to="/" replace /> : <Outlet />;
+  const token = localStorage.getItem("tbgs_access_token");
+
+  return token ? <Navigate to="/dashboard" replace /> : <Outlet />;
 }
 
-function App() {
+/* -------------------- App -------------------- */
+
+const App=()=> {
   return (
     <Router>
       <Routes>
-        {/* Public route for login, redirects if logged in */}
+        {/* Public route */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
-        {/* Protected Layout wrapped with ProtectedRoute */}
+        {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Layout />}>
-            <Route index element={<DashboardPage />} />
-            {/* Dynamic route with approval type parameter */}
-            <Route path="/:approvalType" element={<ApprovalDetailsPage />} />
-            <Route path="/:approvalType/:id" element={<ViewDetailPage />} />
-            {/* Add more nested pages below */}
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard">
+              <Route index element={<DashboardPage />} />
+              <Route path=":approvalType" element={<ApprovalDetailsPage />} />
+              <Route path=":approvalType/:id" element={<ViewDetailPage />} />
+            </Route>
           </Route>
         </Route>
 
-        {/* Catch-all route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );
 }
-
 export default App;
