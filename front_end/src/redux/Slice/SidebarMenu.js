@@ -83,7 +83,7 @@ const sidebarMenuSlice = createSlice({
         
         API_RESPONSE_SIMPLE_DATA.forEach((item, index) => {
           newMenuItems.push({
-            id: index + 2,
+            id: item.id,
             name: item.title,
             path: `/dashboard/${createSlug(item.title)}`,
             icon: getIconForTitle(item.title),

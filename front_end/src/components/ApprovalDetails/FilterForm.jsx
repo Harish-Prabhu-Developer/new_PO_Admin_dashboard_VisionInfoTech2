@@ -1,373 +1,257 @@
 // src/components/ApprovalDetails/FilterForm.jsx
 import React, { useState, useEffect } from "react";
-import { Search, Filter, ChevronDown } from "lucide-react";
+import { 
+  Search, 
+  Filter, 
+  ChevronDown, 
+  RefreshCcw, 
+  X, 
+  Calendar, 
+  RotateCcw
+} from "lucide-react";
 
-// Sample data for dropdowns (you would fetch this from API)
 const COMPANY_OPTIONS = [
-  { value: "az", label: "AZ (15)" },
+  { value: "az", label: "Choose Company" },
   { value: "ab", label: "AB" },
   { value: "bc", label: "BC" },
 ];
 
 const PURCHASE_TYPE_OPTIONS = [
-  { value: "all", label: "All Types" },
   { value: "domestic", label: "DOMESTIC" },
   { value: "import", label: "IMPORT" },
-  { value: "export", label: "EXPORT" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "All Status" },
+  { value: "all", label: "Choose Status" },
   { value: "pending", label: "Pending" },
   { value: "approved", label: "Approved" },
   { value: "hold", label: "Hold" },
-  { value: "rejected", label: "Rejected" },
 ];
 
-const DEPARTMENT_OPTIONS = [
-  { value: "all", label: "All Departments" },
-  { value: "az-medical", label: "AZ MEDICAL" },
-  { value: "flexible-packaging", label: "FLEXIBLE PACKAGING" },
-  { value: "workshop", label: "WORKSHOP" },
-  { value: "mover", label: "MOVER" },
-  { value: "az-garage", label: "AZ GARAGE" },
-  { value: "central-store", label: "CENTRAL STORE" },
-];
-
-const SUPPLIER_OPTIONS = [
-  { value: "all", label: "All Suppliers" },
-  { value: "addamo", label: "ADDAMO MARINA HARDWARE" },
-  { value: "makello", label: "MAKELLO GENERAL SUPPLY" },
-  { value: "vision", label: "VISION INFOTECH LTD" },
-  { value: "polyfoam", label: "POLYFOAM LIMITED" },
-  { value: "complex", label: "COMPLICATED TECHNOLOGIES LTD" },
-  { value: "phica", label: "PHICA AUTO CENTER" },
-];
-
+/**
+ * Filter Form component matching the theme in the provided images.
+ */
 const FilterForm = ({ 
   filters = {}, 
   onFilterChange, 
   onReset,
   onApplyFilters,
   isLoading = false,
-  title = "Filter Options"
+  title = "Filter Approval Requests"
 }) => {
-  const [localFilters, setLocalFilters] = useState({
-    company: filters.company || "",
-    purchaseType: filters.purchaseType || "",
-    supplier: filters.supplier || "",
-    department: filters.department || "",
-    status: filters.status || "",
-    searchFrom: filters.searchFrom || "",
-    searchTo: filters.searchTo || "",
-    poRollNo: filters.poRollNo || "",
-    currency: filters.currency || "",
-    minAmount: filters.minAmount || "",
-    maxAmount: filters.maxAmount || "",
-    ...filters
-  });
+  const [localFilters, setLocalFilters] = useState({ ...filters });
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
-  // Update local filters when props change
   useEffect(() => {
-    setLocalFilters({
-      company: filters.company || "",
-      purchaseType: filters.purchaseType || "",
-      supplier: filters.supplier || "",
-      department: filters.department || "",
-      status: filters.status || "",
-      searchFrom: filters.searchFrom || "",
-      searchTo: filters.searchTo || "",
-      poRollNo: filters.poRollNo || "",
-      currency: filters.currency || "",
-      minAmount: filters.minAmount || "",
-      maxAmount: filters.maxAmount || "",
-      ...filters
-    });
+    setLocalFilters({ ...filters });
   }, [filters]);
 
-  const handleInputChange = (field, value) => {
-    const updated = { ...localFilters, [field]: value };
-    setLocalFilters(updated);
-    // Only notify parent on field change if you want real-time filtering
-    // onFilterChange?.(updated);
+  const handleChange = (field, value) => {
+    setLocalFilters(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleReset = () => {
-    const resetFilters = {
-      company: "",
-      purchaseType: "",
-      supplier: "",
-      department: "",
-      status: "",
-      searchFrom: "",
-      searchTo: "",
-      poRollNo: "",
-      currency: "",
-      minAmount: "",
-      maxAmount: "",
-    };
-    setLocalFilters(resetFilters);
-    onReset?.(resetFilters);
-  };
-
-  const handleApplyFilters = () => {
+  const handleApply = () => {
     onApplyFilters?.(localFilters);
   };
 
-  const SelectField = ({ label, value, options, field, placeholder = "Choose Below" }) => (
-    <div className="space-y-1">
-      <label className="block text-xs font-medium text-gray-700">
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(e) => handleInputChange(field, e.target.value)}
-          disabled={isLoading}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white disabled:bg-gray-100"
-        >
-          <option value="">{placeholder}</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-      </div>
-    </div>
-  );
-
-  const DateField = ({ label, value, field, placeholder = "YYYY-MM-DD" }) => (
-    <div className="space-y-1">
-      <label className="block text-xs font-medium text-gray-700">
-        {label}
-      </label>
-      <input
-        type="date"
-        value={value}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        disabled={isLoading}
-        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-        placeholder={placeholder}
-      />
-    </div>
-  );
-
-  // Helper to get display value for active filters
-  const getDisplayValue = (key, value) => {
-    if (!value) return "";
-    
-    const optionMaps = {
-      company: COMPANY_OPTIONS,
-      purchaseType: PURCHASE_TYPE_OPTIONS,
-      status: STATUS_OPTIONS,
-      department: DEPARTMENT_OPTIONS,
-      supplier: SUPPLIER_OPTIONS,
-    };
-    
-    if (optionMaps[key]) {
-      const option = optionMaps[key].find(opt => opt.value === value);
-      return option ? option.label : value;
-    }
-    
-    return value;
+  const handleReset = () => {
+    const cleared = Object.keys(localFilters).reduce((acc, key) => ({ ...acc, [key]: "" }), {});
+    setLocalFilters(cleared);
+    onReset?.();
   };
 
-  const hasActiveFilters = Object.values(localFilters).some(val => val && val !== "");
+  const InputWrapper = ({ label, children }) => (
+    <div className="flex flex-col space-y-1.5 flex-1 min-w-[200px]">
+      <label className="text-[13px] font-bold text-slate-500">{label}</label>
+      {children}
+    </div>
+  );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      {/* Filter Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-2 mb-2 sm:mb-0">
-          <Filter className="w-4 h-4 text-indigo-600" />
-          <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
+      
+      {/* Header */}
+      <div className="bg-slate-50/50 px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+        <div className="flex items-center space-x-3 text-indigo-600">
+          <Filter size={18} className="stroke-[2.5]" />
+          <h3 className="text-[15px] font-bold text-slate-800 tracking-tight">{title}</h3>
         </div>
+        
         <div className="flex items-center space-x-2">
-          <button
+          <button 
             onClick={handleReset}
-            disabled={isLoading}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 disabled:opacity-50"
+            className="px-4 py-2 text-[13px] font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors flex items-center space-x-2"
           >
-            Reset All
+            <RotateCcw size={14} />
+            <span>Reset All</span>
           </button>
-          <button
-            onClick={handleApplyFilters}
+          <button 
+            onClick={handleApply}
             disabled={isLoading}
-            className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center space-x-1 disabled:opacity-50"
+            className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-[13px] font-bold flex items-center space-x-2 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50"
           >
-            <Search className="w-3 h-3" />
+            <Search size={14} className="stroke-3" />
             <span>Apply Filters</span>
           </button>
         </div>
       </div>
 
-      {/* Filter Grid */}
-      <div className="p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Row 1 */}
-          <SelectField
-            label="Company"
-            value={localFilters.company}
-            options={COMPANY_OPTIONS}
-            field="company"
-            placeholder="Choose Company"
-          />
-          
-          <SelectField
-            label="Purchase Type"
-            value={localFilters.purchaseType}
-            options={PURCHASE_TYPE_OPTIONS}
-            field="purchaseType"
-            placeholder="Choose Purchase Type"
-          />
-          
-          <SelectField
-            label="Supplier"
-            value={localFilters.supplier}
-            options={SUPPLIER_OPTIONS}
-            field="supplier"
-            placeholder="Choose Supplier"
-          />
-          
-          <SelectField
-            label="Department"
-            value={localFilters.department}
-            options={DEPARTMENT_OPTIONS}
-            field="department"
-            placeholder="Choose Department"
-          />
+      {/* Grid */}
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <InputWrapper label="Company">
+             <div className="relative">
+                <select 
+                  value={localFilters.company || ""}
+                  onChange={(e) => handleChange("company", e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Choose Company</option>
+                  <option value="az">AZ Group</option>
+                  <option value="ab">AB Logistics</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+             </div>
+          </InputWrapper>
 
-          {/* Row 2 */}
-          <SelectField
-            label="Status"
-            value={localFilters.status}
-            options={STATUS_OPTIONS}
-            field="status"
-            placeholder="Choose Status"
-          />
-          
-          <DateField
-            label="Search From Date"
-            value={localFilters.searchFrom}
-            field="searchFrom"
-            placeholder="From Date"
-          />
-          
-          <DateField
-            label="Search To Date"
-            value={localFilters.searchTo}
-            field="searchTo"
-            placeholder="To Date"
-          />
-          
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-700">
-              PO Roll No
-            </label>
-            <input
-              type="text"
-              value={localFilters.poRollNo}
-              onChange={(e) => handleInputChange("poRollNo", e.target.value)}
-              disabled={isLoading}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
-              placeholder="Enter PO Roll No"
-            />
-          </div>
+          <InputWrapper label="Purchase Type">
+             <div className="relative">
+                <select 
+                  value={localFilters.purchaseType || ""}
+                  onChange={(e) => handleChange("purchaseType", e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Choose Purchase Type</option>
+                  <option value="domestic">DOMESTIC</option>
+                  <option value="import">IMPORT</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+             </div>
+          </InputWrapper>
+
+          <InputWrapper label="Supplier">
+             <div className="relative">
+                <select 
+                  value={localFilters.supplier || ""}
+                  onChange={(e) => handleChange("supplier", e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Choose Supplier</option>
+                  <option value="vision">Vision Infotech</option>
+                  <option value="addamo">Addamo Hardware</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+             </div>
+          </InputWrapper>
+
+          <InputWrapper label="Department">
+             <div className="relative">
+                <select 
+                  value={localFilters.department || ""}
+                  onChange={(e) => handleChange("department", e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Choose Department</option>
+                  <option value="medical">AZ Medical</option>
+                  <option value="flexible">Flexible Packaging</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+             </div>
+          </InputWrapper>
+
+          {/* Second Row */}
+          <InputWrapper label="Status">
+             <div className="relative">
+                <select 
+                  value={localFilters.status || ""}
+                  onChange={(e) => handleChange("status", e.target.value)}
+                  className="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                >
+                  <option value="">Choose Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="hold">Hold</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+             </div>
+          </InputWrapper>
+
+          <InputWrapper label="Search From Date">
+             <div className="relative">
+                <input 
+                  type="date"
+                  value={localFilters.searchFrom || ""}
+                  onChange={(e) => handleChange("searchFrom", e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+             </div>
+          </InputWrapper>
+
+          <InputWrapper label="Search To Date">
+             <div className="relative">
+                <input 
+                  type="date"
+                  value={localFilters.searchTo || ""}
+                  onChange={(e) => handleChange("searchTo", e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
+                />
+             </div>
+          </InputWrapper>
+
+          <InputWrapper label="PO Roll No">
+             <input 
+               type="text"
+               placeholder="Enter PO Roll No"
+               value={localFilters.poRollNo || ""}
+               onChange={(e) => handleChange("poRollNo", e.target.value)}
+               className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-300"
+             />
+          </InputWrapper>
         </div>
 
-        {/* Additional filters (collapsible) */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <details className="group">
-            <summary className="flex items-center justify-between cursor-pointer text-sm font-medium text-gray-700">
-              <span>Advanced Filters</span>
-              <ChevronDown className="w-4 h-4 transform group-open:rotate-180 transition-transform" />
-            </summary>
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-700">
-                  Currency
-                </label>
-                <select
-                  value={localFilters.currency || ""}
-                  onChange={(e) => handleInputChange("currency", e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="">All Currencies</option>
-                  <option value="TSH">TSH</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                </select>
-              </div>
-              
-              <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-700">
-                  Min Amount
-                </label>
-                <input
-                  type="number"
-                  value={localFilters.minAmount || ""}
-                  onChange={(e) => handleInputChange("minAmount", e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Min Amount"
-                  min="0"
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <label className="block text-xs font-medium text-gray-700">
-                  Max Amount
-                </label>
-                <input
-                  type="number"
-                  value={localFilters.maxAmount || ""}
-                  onChange={(e) => handleInputChange("maxAmount", e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Max Amount"
-                  min="0"
-                />
-              </div>
-            </div>
-          </details>
+        {/* Advanced Toggle */}
+        <div className="pt-2 border-t border-slate-100">
+           <button 
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="flex items-center space-x-2 text-[14px] font-bold text-slate-700 hover:text-indigo-600 transition-colors"
+           >
+             <span>Advanced Filters</span>
+             <ChevronDown size={14} className={`transition-transform duration-300 ${isAdvancedOpen ? 'rotate-180' : ''}`} />
+           </button>
+           
+           {isAdvancedOpen && (
+             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-top-2">
+                <InputWrapper label="Currency">
+                   <select 
+                    value={localFilters.currency || ""}
+                    onChange={(e) => handleChange("currency", e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none"
+                   >
+                     <option value="">All Currencies</option>
+                     <option value="TSH">TSH</option>
+                     <option value="USD">USD</option>
+                   </select>
+                </InputWrapper>
+                <InputWrapper label="Min Amount">
+                   <input 
+                    type="number"
+                    value={localFilters.minAmount || ""}
+                    onChange={(e) => handleChange("minAmount", e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none"
+                   />
+                </InputWrapper>
+                <InputWrapper label="Max Amount">
+                   <input 
+                    type="number"
+                    value={localFilters.maxAmount || ""}
+                    onChange={(e) => handleChange("maxAmount", e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none"
+                   />
+                </InputWrapper>
+             </div>
+           )}
         </div>
       </div>
-
-      {/* Active Filters */}
-      {hasActiveFilters && (
-        <div className="px-4 py-2 bg-blue-50 border-t border-blue-100">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-blue-800 font-medium">Active Filters:</span>
-            <button
-              onClick={handleReset}
-              className="text-xs text-blue-600 hover:text-blue-800"
-            >
-              Clear All
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {Object.entries(localFilters)
-              .filter(([_, value]) => value && value !== "")
-              .map(([key, value]) => (
-                <span
-                  key={key}
-                  className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                >
-                  {key === 'minAmount' || key === 'maxAmount' 
-                    ? `${key.replace('min', 'Min ').replace('max', 'Max ')}: ${value}` 
-                    : `${key}: ${getDisplayValue(key, value)}`
-                  }
-                  <button
-                    onClick={() => handleInputChange(key, "")}
-                    className="ml-1 text-blue-600 hover:text-blue-800"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

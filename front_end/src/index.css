@@ -4,6 +4,7 @@
 
 body {
   font-family: 'Poppins', 'Inter', 'Roboto', sans-serif;
+  overflow-x: hidden;
 }
 
 
@@ -48,14 +49,14 @@ body {
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
 }
 
-/* Content Area Scrollbar (Dark for Light Backgrounds) */
+/* Content Area Scrollbar (Ultra Thin for Main Content) */
 .content-scrollbar {
   scrollbar-gutter: stable;
 }
 
 .content-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px; /* Ultra thin */
+  height: 4px;
 }
 
 .content-scrollbar::-webkit-scrollbar-track {
@@ -63,21 +64,26 @@ body {
 }
 
 .content-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(79, 70, 229, 0.1); /* Subtle indigo */
+  background-color: rgba(79, 70, 229, 0.05); /* Extremely subtle indigo */
   border-radius: 9999px;
   transition: background-color 0.3s ease;
 }
 
 .content-scrollbar:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(79, 70, 229, 0.3);
+  background-color: rgba(79, 70, 229, 0.2);
 }
 
 .content-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(79, 70, 229, 0.5);
+  background-color: rgba(79, 70, 229, 0.4);
 }
 
 /* Firefox */
 .content-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(79, 70, 229, 0.2) transparent;
+  scrollbar-color: rgba(79, 70, 229, 0.1) transparent;
+}
+
+/* Global Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
 }
