@@ -1,7 +1,7 @@
 // src/pages/Layout.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { 
+import {
   Menu,
   X,
   ChevronLeft,
@@ -44,6 +44,7 @@ import {
   LockKeyhole,
   Home
 } from "lucide-react";
+import Footer from '../components/Footer';
 
 const iconMap = {
   LayoutDashboard,
@@ -74,15 +75,15 @@ const iconMap = {
 };
 
 const Layout = ({ children }) => {
-  const { 
-    isSidebarOpen, 
-    userData, 
+  const {
+    isSidebarOpen,
+    userData,
     menuItems,
     setSidebarOpen,
     clearUserData,
     setActiveMenuItem: setActiveMenuItemAction
   } = useSidebarMenu();
-  
+
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -123,7 +124,7 @@ const Layout = ({ children }) => {
     // Navigate if it's the dashboard, if there are pending items, or if it's already the active route
     const isDashboard = item.path === '/dashboard' || item.path === '/';
     const hasPending = Number(item.pendingCount) > 0;
-    
+
     if (isDashboard || hasPending || item.active) {
       setIsMobileSidebarOpen(false);
       navigate(item.path);
@@ -136,10 +137,10 @@ const Layout = ({ children }) => {
 
   return (
     <div className="relative flex max-h-screen w-full bg-white overflow-x-hidden content-scrollbar">
-      
+
       {/* Mobile Overlay */}
       {isMobileSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-60 lg:hidden animate-in fade-in duration-300"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
@@ -184,7 +185,7 @@ const Layout = ({ children }) => {
           {menuItems.map((item) => {
             const Icon = iconMap[item.icon] || LayoutDashboard;
             const hasPendingItems = item.pendingCount > 0;
-            
+
             return (
               <button
                 key={item.id}
@@ -220,7 +221,7 @@ const Layout = ({ children }) => {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-white/10 shrink-0">
-          <button 
+          <button
             onClick={handleLogout}
             className={`flex items-center space-x-3 w-full p-2.5 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors ${!isExpanded && 'justify-center'}`}
             title="Sign Out"
@@ -233,21 +234,21 @@ const Layout = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 w-full relative">
-        
+
         {/* Integrated Top Navigation (User-Requested Structure) */}
         <header className="bg-white sticky top-0 z-50 w-full border-b border-slate-100 shadow-xs">
           {/* Top Row: Mobile Toggle, Logo, Profile */}
           <div className="flex items-center justify-between px-4 py-2 h-14 md:h-16 w-full">
             <div className="flex items-center space-x-4 shrink-0">
               {/* Sidebar Toggles */}
-              <button 
+              <button
                 onClick={() => setIsMobileSidebarOpen(true)}
                 className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-indigo-600 transition-all"
               >
                 <Menu size={22} />
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setSidebarOpen(!isSidebarOpen)}
                 className="hidden lg:flex items-center justify-center p-2 rounded-xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all border border-transparent hover:border-slate-100"
               >
@@ -277,17 +278,20 @@ const Layout = ({ children }) => {
           {/* Bottom Row: Breadcrumbs Section */}
           {location.pathname !== "/" && (
             <div className="px-4 py-2 bg-slate-50/80 border-t border-slate-100">
-               <Breadcrumbs />
+              <Breadcrumbs />
             </div>
           )}
         </header>
 
         {/* Dynamic Page Container */}
         <main className="flex-1 w-full p-2 sm:p-4 lg:p-6 overflow-x-hidden overflow-y-auto bg-slate-50/50">
-          <div className="max-w-[1600px] mx-auto w-full">
-             {children || <Outlet />}
+          <div className="max-w-400 mx-auto w-full">
+            {children || <Outlet />}
           </div>
+          {/* our Footer */}
+          <Footer />
         </main>
+
       </div>
     </div>
   );
