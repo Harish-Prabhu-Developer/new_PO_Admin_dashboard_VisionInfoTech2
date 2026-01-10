@@ -219,11 +219,11 @@ const ApprovalDetailsPage = () => {
     toast('Filters cleared', { icon: '🧹' });
   };
 
-  const handleViewDetails = (row) => {
-    navigate(`/${approvalType}/${row.id}`, { state: { rowData: row, cardData } });
-  };
+  const handleViewDetails = React.useCallback((row) => {
+    navigate(`${row.id}`, { state: { rowData: row, cardData } });
+  }, [approvalType, navigate, cardData]);
 
-  const tableColumns = useMemo(() => getTableColumns(handleViewDetails), []);
+  const tableColumns = useMemo(() => getTableColumns(handleViewDetails), [handleViewDetails]);
 
   return (
     <div className="min-h-screen bg-transparent pb-10">

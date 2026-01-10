@@ -49,8 +49,10 @@ const App=()=> {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard">
               <Route index element={<DashboardPage />} />
-              <Route path=":approvalType" element={<ApprovalDetailsPage />} />
-              <Route path=":approvalType/:id" element={<ViewDetailPage />} />
+              <Route path=":approvalType">
+                <Route index element={<ApprovalDetailsPage />} />
+                <Route path=":id" element={<ViewDetailPage />} />
+              </Route>
             </Route>
           </Route>
         </Route>

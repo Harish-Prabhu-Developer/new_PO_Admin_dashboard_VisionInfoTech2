@@ -120,8 +120,16 @@ const Layout = ({ children }) => {
   };
 
   const handleMenuItemClick = (item) => {
-    setIsMobileSidebarOpen(false);
-    navigate(item.path);
+    // Navigate if it's the dashboard, if there are pending items, or if it's already the active route
+    const isDashboard = item.path === '/dashboard' || item.path === '/';
+    const hasPending = Number(item.pendingCount) > 0;
+    
+    if (isDashboard || hasPending || item.active) {
+      setIsMobileSidebarOpen(false);
+      navigate(item.path);
+    } else {
+      toast.error(`No pending entries for ${item.name}`);
+    }
   };
 
   const isExpanded = isMobileSidebarOpen || isSidebarOpen;
@@ -176,12 +184,13 @@ const Layout = ({ children }) => {
           {menuItems.map((item) => {
             const Icon = iconMap[item.icon] || LayoutDashboard;
             const hasPendingItems = item.pendingCount > 0;
+            
             return (
               <button
                 key={item.id}
                 onClick={() => handleMenuItemClick(item)}
                 className={`
-                  w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all group
+                  w-full flex items-center  justify-between px-3 py-3 rounded-xl transition-all group
                   ${item.active ? 'bg-white/15 shadow-sm text-white' : 'text-indigo-100/70 hover:bg-white/10 hover:text-white'}
                   ${!isExpanded && 'justify-center'}
                 `}
