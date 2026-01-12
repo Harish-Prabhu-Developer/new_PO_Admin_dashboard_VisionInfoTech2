@@ -1,0 +1,25 @@
+{
+  "name": "new",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install --prefix front_end && npm install --prefix back_end",
+    "dev:back": "npm run dev --prefix back_end",
+    "dev:front": "npm run dev --prefix front_end",
+    "dev": "npx concurrently \"npm run dev:back\" \"npm run dev:front\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harish-Prabhu-Developer/new_PO_Admin_dashboard_VisionInfoTech2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Harish-Prabhu-Developer/new_PO_Admin_dashboard_VisionInfoTech2/issues"
+  },
+  "homepage": "https://github.com/Harish-Prabhu-Developer/new_PO_Admin_dashboard_VisionInfoTech2#readme",
+  "description": ""
+}

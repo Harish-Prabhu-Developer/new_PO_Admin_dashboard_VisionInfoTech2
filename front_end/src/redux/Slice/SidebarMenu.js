@@ -1,6 +1,7 @@
 // src/redux/Slice/SidebarMenu.js
 import { createSlice } from '@reduxjs/toolkit';
 import { API_RESPONSE_SIMPLE_DATA } from '../../utils/Auth/dummyData';
+import { getIconForTitle } from '../../utils/IconHelper';
 
 const initialState = {
   isOpen: true,
@@ -22,40 +23,13 @@ const initialState = {
 const createSlug = (value) => {
   return value
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+    .replace("&", " and ") // Replace & with ' and '
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Replace spaces with -
+    .replace(/^-+|-+$/g, ""); // Trim dashes
 };
 
-// Icon mapping based on title keywords
-const getIconForTitle = (title) => {
-  const lowerTitle = title.toLowerCase();
-  
-  if (lowerTitle.includes('po') && lowerTitle.includes('approval')) return 'FileCheck';
-  if (lowerTitle.includes('cash')) return 'Wallet';
-  if (lowerTitle.includes('credit')) return 'CreditCard';
-  if (lowerTitle.includes('price')) return 'Tag';
-  if (lowerTitle.includes('goods')) return 'PackageCheck';
-  if (lowerTitle.includes('inter-company')) return 'Building2';
-  if (lowerTitle.includes('sales return')) return 'RotateCcw';
-  if (lowerTitle.includes('gate pass')) return 'DoorOpen';
-  if (lowerTitle.includes('product creation')) return 'Boxes';
-  if (lowerTitle.includes('customer creation')) return 'UserPlus';
-  if (lowerTitle.includes('wastage')) return 'Trash2';
-  if (lowerTitle.includes('work order')) return 'ClipboardList';
-  if (lowerTitle.includes('pfl')) return 'Factory';
-  if (lowerTitle.includes('roll cutt')) return 'Scissors';
-  if (lowerTitle.includes('expat travel')) return 'Plane';
-  if (lowerTitle.includes('sales pi')) return 'ReceiptText';
-  if (lowerTitle.includes('purchase pi')) return 'ShoppingCart';
-  if (lowerTitle.includes('apparels')) return 'Shirt';
-  if (lowerTitle.includes('approval head')) return 'ShieldCheck';
-  if (lowerTitle.includes('overtime')) return 'Clock';
-  if (lowerTitle.includes('encashment')) return 'HandCoins';
-  if (lowerTitle.includes('bonce purchase')) return 'ShoppingCart';
-  if (lowerTitle.includes('bond release')) return 'LockKeyhole';
-  
-  return 'LayoutDashboard'; // Default icon
-};
+
 
 const sidebarMenuSlice = createSlice({
   name: 'sidebarMenu',
@@ -69,31 +43,32 @@ const sidebarMenuSlice = createSlice({
     },
     setUserData: (state, action) => {
       state.userData = action.payload;
+    },
+    populateMenuFromDashboard: (state, action) => {
+      const dashboardData = action.payload;
+      if (!dashboardData) return;
+
+      // Start with Dashboard
+      const newMenuItems = [{ 
+        id: 1, 
+        name: 'Dashboard', 
+        path: '/dashboard', 
+        icon: 'LayoutDashboard', 
+        active: false 
+      }];
       
-      // Update menu items based on user permissions
-      if (action.payload) {
-        // Start with Dashboard
-        const newMenuItems = [{ 
-          id: 1, 
-          name: 'Dashboard', 
-          path: '/dashboard', 
-          icon: 'LayoutDashboard', 
-          active: false 
-        }];
-        
-        API_RESPONSE_SIMPLE_DATA.forEach((item, index) => {
-          newMenuItems.push({
-            id: item.id,
-            name: item.title,
-            path: `/dashboard/${createSlug(item.title)}`,
-            icon: getIconForTitle(item.title),
-            active: false,
-            pendingCount: item.value
-          });
+      dashboardData.forEach((item) => {
+        newMenuItems.push({
+          id: item.sno, // Use sno from DB as ID
+          name: item.card_title, // Use card_title from DB
+          path: `/dashboard/${createSlug(item.card_title)}`,
+          icon: getIconForTitle(item.card_title), // Use helper function for icon
+          active: false,
+          pendingCount: item.card_value // Use card_value from DB
         });
-        
-        state.menuItems = newMenuItems;
-      }
+      });
+      
+      state.menuItems = newMenuItems;
     },
     setActiveMenuItem: (state, action) => {
       const { path } = action.payload;
@@ -154,6 +129,7 @@ export const {
   toggleSidebar,
   setSidebarOpen,
   setUserData,
+  populateMenuFromDashboard,
   setActiveMenuItem,
   updatePendingCount,
   setLoading,

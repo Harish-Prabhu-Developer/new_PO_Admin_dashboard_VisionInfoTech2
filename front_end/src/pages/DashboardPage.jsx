@@ -1,4 +1,6 @@
-import React from "react";
+// src/pages/DashboardPage.jsx
+import React, { useEffect, useState } from "react";
+import { getIconForTitle } from "../utils/IconHelper";
 import { useNavigate } from "react-router-dom";
 import {
   FileCheck,
@@ -25,35 +27,28 @@ import {
   LockKeyhole,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
 
-  const CardData = [
-    { id: 1, title: "PO Approval", value: 0, iconKey: "FileCheck" },
-    { id: 2, title: "Cash Advance Approval", value: 10, iconKey: "Wallet" },
-    { id: 3, title: "Credit Limit Approval", value: 5, iconKey: "CreditCard" },
-    { id: 4, title: "Price Approval", value: 8, iconKey: "Tag" },
-    { id: 5, title: "Goods Request Approval", value: 2, iconKey: "PackageCheck" },
-    { id: 6, title: "Inter-company Approval", value: 4, iconKey: "Building2" },
-    { id: 7, title: "Sales Return Approval", value: 1, iconKey: "RotateCcw" },
-    { id: 8, title: "Gate Pass Approval", value: 3, iconKey: "DoorOpen" },
-    { id: 9, title: "Product Creation Approval", value: 6, iconKey: "Boxes" },
-    { id: 10, title: "Customer Creation Approval", value: 7, iconKey: "UserPlus" },
-    { id: 11, title: "Wastage Delivery Approval", value: 9, iconKey: "Trash2" },
-    { id: 12, title: "Work Order Approval", value: 11, iconKey: "ClipboardList" },
-    { id: 13, title: "PFL Work Order Approval", value: 12, iconKey: "Factory" },
-    { id: 14, title: "PPRB Roll Cutt Templates", value: 13, iconKey: "Scissors" },
-    { id: 15, title: "Expat Travel Leave Approval", value: 14, iconKey: "Plane" },
-    { id: 16, title: "SALES PI Approval", value: 15, iconKey: "ReceiptText" },
-    { id: 17, title: "PURCHASE PI Approval", value: 16, iconKey: "ShoppingCart" },
-    { id: 18, title: "Apparels Dashboard", value: 17, iconKey: "Shirt" },
-    { id: 19, title: "PO Approval Head", value: 18, iconKey: "ShieldCheck" },
-    { id: 20, title: "Overtime Approval", value: 19, iconKey: "Clock" },
-    { id: 21, title: "Expat Leave Encashment", value: 20, iconKey: "HandCoins" },
-    { id: 22, title: "Bonce Purchase Order Approval", value: 21, iconKey: "ShoppingCart" },
-    { id: 23, title: "Bond Release Request Approval", value: 22, iconKey: "LockKeyhole" },
-  ];
+
+  const { data } = useSelector((state) => state.poDashboard);
+  const [cardData, setCardData] = useState([]);
+
+  useEffect(() => {
+    if (data) {
+      const formattedData = data.map((item) => ({
+        id: item.sno,
+        title: item.card_title,
+        value: item.card_value,
+        iconKey: getIconForTitle(item.card_title),
+      }));
+      setCardData(formattedData);
+    }
+  }, [data]);
+
+  const CardData = cardData;
 
   // Icon map (used only in this component)
   const iconMap = {
@@ -88,17 +83,17 @@ const DashboardPage = () => {
       .replace(/\s+/g, "-");
 
     // ✅ pass ONLY serializable data
-    console.log(slug);  
+    console.log(slug);
     if (card.value > 0) {
       navigate(slug, {
-      state: {
-        id: card.id,
-        title: card.title,
-        value: card.value,
-        iconKey: card.iconKey,
-      },
-    });
-    }else{
+        state: {
+          id: card.id,
+          title: card.title,
+          value: card.value,
+          iconKey: card.iconKey,
+        },
+      });
+    } else {
       toast.error(`No pending for ${card.title}`);
     }
   };

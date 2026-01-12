@@ -1,6 +1,7 @@
 // src/pages/Layout.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import {
   Menu,
   X,
@@ -11,7 +12,8 @@ import {
   Bell
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { setUserData, setActiveMenuItem } from '../redux/Slice/SidebarMenu';
+import { setUserData, setActiveMenuItem, populateMenuFromDashboard } from '../redux/Slice/SidebarMenu';
+import { fetchPODashboardData } from '../redux/Slice/PO.Dashboard.Slice';
 import { useSidebarMenu } from '../hooks/useSidebarMenu';
 import toast from 'react-hot-toast';
 import FullscreenToggle from '../components/common/FullscreenToggle';
@@ -94,10 +96,20 @@ const Layout = ({ children }) => {
     const token = localStorage.getItem('tbgs_access_token');
     if (token) {
       try {
-        const parsedData = JSON.parse(token);
-        dispatch(setUserData(parsedData));
+        const decoded = jwtDecode(token);
+        if (decoded?.user) {
+          dispatch(setUserData(decoded.user));
+
+          // Fetch Dashboard Data for this user
+          dispatch(fetchPODashboardData())
+            .unwrap()
+            .then((data) => {
+              dispatch(populateMenuFromDashboard(data));
+            })
+            .catch((err) => console.error("Failed to fetch dashboard menu:", err));
+        }
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('Error decoding token:', error);
       }
     }
   }, [dispatch]);
@@ -224,10 +236,10 @@ const Layout = ({ children }) => {
           <button
             onClick={handleLogout}
             className={`flex items-center space-x-3 w-full p-2.5 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors ${!isExpanded && 'justify-center'}`}
-            title="Sign Out"
+            title="Logout"
           >
             <LogOut size={18} />
-            {isExpanded && <span className="text-sm font-bold">Sign Out</span>}
+            {isExpanded && <span className="text-sm font-bold">Logout</span>}
           </button>
         </div>
       </aside>

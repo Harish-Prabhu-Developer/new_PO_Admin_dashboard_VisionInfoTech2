@@ -1,3 +1,4 @@
+// src/pages/LoginPage.jsx
 import {
   Eye,
   EyeOff,
@@ -10,9 +11,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import toast from "react-hot-toast";
 import { decryptData, encryptData } from "../utils/cryptoUtils";
 import { useNavigate } from "react-router-dom";
-import { Auth_RESPONSE_STRUCTURE } from "../utils/Auth/dummyData";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/Slice/SidebarMenu";
+import axios from "axios";
+import { API_URL } from "../config";
+
 const LoginPage = () => {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -64,21 +67,22 @@ const LoginPage = () => {
       setError("");
       setLoading(true);
 
-      // Simulated API delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      try {
+        const response = await axios.post(`${API_URL}/auth/login`, {
+          User_Approval_Name: username,
+          Password_User: password,
+        });
 
-      if (
-        username === Auth_RESPONSE_STRUCTURE.User_Approval_Name &&
-        password === Auth_RESPONSE_STRUCTURE.Password_User
-      ) {
+        const { user, token } = response.data;
+
         toast.success("Login successful!");
 
-        localStorage.setItem(
-          "tbgs_access_token",
-          JSON.stringify(Auth_RESPONSE_STRUCTURE)
-        );
-          // Dispatch user data to Redux store
-        dispatch(setUserData(Auth_RESPONSE_STRUCTURE));
+        // Save token and user info
+        localStorage.setItem("tbgs_access_token", token);
+        localStorage.setItem("user_info", JSON.stringify(user));
+
+        // Dispatch user data to Redux store
+        dispatch(setUserData(user));
 
         // Save credentials only if Remember Me is checked
         if (rememberMe) {
@@ -87,16 +91,18 @@ const LoginPage = () => {
             encryptData({ username, password })
           );
         }
-        
-        navigate("/");
-      } else {
-        setError("Invalid username or password");
-        toast.error("Invalid username or password");
-      }
 
-      setLoading(false);
+        navigate("/");
+      } catch (err) {
+        console.error("Login failed:", err);
+        const errorMessage = err.response?.data?.error || "Invalid username or password";
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
     },
-    [username, password, rememberMe, navigate]
+    [username, password, rememberMe, navigate, dispatch]
   );
 
   return (
@@ -194,7 +200,7 @@ const LoginPage = () => {
             >
               {loading ? (
                 <>
-                  <Loader className="animate-spin  h-5 w-5 border-white mr-3"/>
+                  <Loader className="animate-spin  h-5 w-5 border-white mr-3" />
                   Authenticating...
                 </>
               ) : (
