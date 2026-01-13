@@ -50,7 +50,7 @@ const sidebarMenuSlice = createSlice({
 
       // Start with Dashboard
       const newMenuItems = [{ 
-        id: 1, 
+        id: 'dashboard-home', 
         name: 'Dashboard', 
         path: '/dashboard', 
         icon: 'LayoutDashboard', 
@@ -64,6 +64,7 @@ const sidebarMenuSlice = createSlice({
           path: `/dashboard/${createSlug(item.card_title)}`,
           icon: getIconForTitle(item.card_title), // Use helper function for icon
           active: false,
+          data: item, // Store the entire item object
           pendingCount: item.card_value // Use card_value from DB
         });
       });

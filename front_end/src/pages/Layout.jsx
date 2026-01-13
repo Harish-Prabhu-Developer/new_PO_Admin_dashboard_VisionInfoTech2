@@ -139,7 +139,15 @@ const Layout = ({ children }) => {
 
     if (isDashboard || hasPending || item.active) {
       setIsMobileSidebarOpen(false);
-      navigate(item.path);
+      navigate(item.path, {
+        state: {
+
+          id: item.id,
+          title: item.name,
+          value: item.pendingCount,
+          iconKey: item.icon
+        }
+      });
     } else {
       toast.error(`No pending entries for ${item.name}`);
     }

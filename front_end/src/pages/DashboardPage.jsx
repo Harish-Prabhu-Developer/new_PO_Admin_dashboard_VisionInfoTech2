@@ -44,6 +44,7 @@ const DashboardPage = () => {
         value: item.card_value,
         iconKey: getIconForTitle(item.card_title),
       }));
+      console.table(formattedData);
       setCardData(formattedData);
     }
   }, [data]);
@@ -85,6 +86,8 @@ const DashboardPage = () => {
     // ✅ pass ONLY serializable data
     console.log(slug);
     if (card.value > 0) {
+      console.table(card);
+
       navigate(slug, {
         state: {
           id: card.id,
