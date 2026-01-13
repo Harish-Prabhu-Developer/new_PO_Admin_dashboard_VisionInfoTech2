@@ -113,7 +113,7 @@ const DashboardPage = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {CardData.map((card) => {
-            const Icon = iconMap[card.iconKey];
+            const Icon = iconMap[card.iconKey] || FileCheck;
 
             return (
               <div
