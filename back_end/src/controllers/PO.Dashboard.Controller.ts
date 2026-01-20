@@ -75,6 +75,9 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Dashboard Card not found' });
         }
 
+
+        
+        
         // 2. Fetch Approval Details
         // Mapping DB columns to the requested JSON Keys
         // We join specific tables as requested to build the view
@@ -97,7 +100,7 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
                 CAST(h.company_id AS VARCHAR) as "company",
                 CAST(h.po_store_id AS VARCHAR) as "department",
                 
-                -- Formatting amount with commas (Postgres TO_CHAR for basic formatting, or handle in frontend. Here using simple cast)
+                -- Formatting amount with commas (Postgres TO_CHAR for basic formatting)
                 TO_CHAR(h.total_final_production_hdr_amount, 'FM9,999,999,999.00') as "amount",
                 h.currency_type as "currency",
                 
@@ -127,51 +130,15 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
                 COALESCE(h.final_response_status, 'PENDING') as "finalStatus"
                 
             FROM ${TABLE_PURCHASE_ORDER_HEADER} h
-            -- Potentially filter by status_entry = 'Active' or similar standard filters
-            -- WHERE h.status_entry = 'Active'
-            ORDER BY h.po_date DESC;
+            ORDER BY h.po_date DESC
+            LIMIT $1;
         `;
 
-        const result = await query(sqlQuery);
-        
-        
-        // If DB has data, return it
-        // if (result.rows.length > 0) {
-        //     return res.status(200).json({
-        //         length: result.rows.length,
-        //         rows: result.rows
-        //     });
-        // }
-
-        // // Fallback: If DB is empty, return Mock Data (for demo/development purposes)
-        const mockTableData = [
-            ...Array.from({ length: dashboardResult.rows[0].card_value }, (_, i) => ({
-                id: i + 2,
-                cell: `A${i + 2}`,
-                comp: "AZ",
-                poNo: `PO-2026-00${60 + i}`,
-                poType: i % 2 === 0 ? "DOMESTIC" : "IMPORT",
-                supplier: i % 3 === 0 ? "ADDAMO MARINA HARDWARE" : i % 3 === 1 ? "VISION INFOTECH LTD" : "POLYFOAM LIMITED",
-                product: `Industrial Part ${i + 101}`,
-                company: "AZ",
-                department: i % 2 === 0 ? "AZ MEDICAL" : "FLEXIBLE PACKAGING",
-                amount: `${(Math.random() * 5000000).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
-                currency: i % 2 === 0 ? "TSH" : "USD",
-                requestedBy: `user${i} / ${i + 1}-Jan-2026`,
-                pendingDays: `${i}`,
-                response1Person: i % 4 === 0 ? "Mr.Kalpesh / 07-Jan-2026 12:53:24" : "Mr. John",
-                response1Status: i % 4 === 0 ? "APPROVED" : i % 5 === 0 ? "HOLD" : "APPROVED",
-                response1Remarks: i % 6 === 0 ? "Some remarks here" : "",
-                response2Person: i % 7 === 0 ? "Mr.Shaaf / 06-Jan-2026 09:36:30" : "Shaaf",
-                response2Status: i % 7 === 0 ? "APPROVED" : "PENDING",
-                response2Remarks: i % 8 === 0 ? "Additional remarks" : "",
-                finalStatus: i % 4 === 0 ? "APPROVED" : i % 5 === 0 ? "HOLD" : "PENDING",
-            }))
-        ];
+        const result = await query(sqlQuery, [dashboardResult.rows[0].card_value]);
 
         return res.status(200).json({
-            length: mockTableData.length,
-            rows: mockTableData
+            length: result.rows.length,
+            rows: result.rows
         });
 
     } catch (error) {
@@ -179,3 +146,62 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+// Update Approval Status
+export const updateApprovalStatus = async (req: Request, res: Response) => {
+    try {
+        const { ids, status, remarks } = req.body; // ids is array of sno
+
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'Invalid or missing IDs' });
+        }
+        if (!status) {
+            return res.status(400).json({ error: 'Status is required' });
+        }
+
+        // Validate Status
+        const validStatuses = ['APPROVED', 'PENDING', 'REJECTED', 'HOLD'];
+        if (!validStatuses.includes(status)) {
+             return res.status(400).json({ error: 'Invalid Status provided' });
+        }
+
+        const userId = req.user?.sno;
+        // Fetch user name for logging
+        let userName = 'Unknown User';
+        if (userId) {
+             const userResult = await query(`SELECT emp_name FROM ${TABLE_USER} WHERE sno = $1`, [userId]);
+             userName = userResult.rows[0]?.emp_name || 'Unknown User';
+        }
+
+        // Construct Update Query
+        // We will update final_response_status, final_response_date, final_response_person
+        // Note: For this request, we are doing a direct update on the final status column as requested.
+
+        const updateQuery = `
+            UPDATE ${TABLE_PURCHASE_ORDER_HEADER}
+            SET 
+                final_response_status = $1,
+                final_response_date = NOW(),
+                final_response_person = $2,
+                final_response_remarks = COALESCE($3, final_response_remarks)
+            WHERE sno = ANY($4::int[])
+            RETURNING sno, po_ref_no, final_response_status;
+        `;
+
+        const result = await query(updateQuery, [status, userName, remarks || null, ids]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'No records found to update' });
+        }
+
+        return res.status(200).json({
+            message: `Successfully updated ${result.rowCount} records to ${status}`,
+            updatedRows: result.rows
+        });
+
+    } catch (error) {
+        console.error('Error updating approval status:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+

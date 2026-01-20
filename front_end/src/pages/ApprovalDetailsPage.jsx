@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchApprovalDetails, clearApprovalDetails } from "../redux/Slice/ApprovalDetails.Slice";
+import { fetchApprovalDetails, clearApprovalDetails, updateApprovalStatus } from "../redux/Slice/ApprovalDetails.Slice";
 import FilterForm from "../components/ApprovalDetails/FilterForm";
 import DataTable from "../components/ApprovalDetails/DataTable";
 import {
@@ -230,10 +230,31 @@ const ApprovalDetailsPage = () => {
     });
   }, [filters, approvalData]);
 
-  const handleBulkStatusChange = (ids, status) => {
-    toast.success(`Broadcasting ${status} status for ${ids.length} requests...`);
-    setSelectedRows([]);
-    setIsBulkDropdownOpen(false);
+  const handleBulkStatusChange = async (ids, status) => {
+    // 1. Dispatch the update action
+    try {
+      await dispatch(updateApprovalStatus({ ids, status })).unwrap();
+
+      // 2. Determine PO Numbers for success message
+      const porefNo = approvalData?.rows
+        ?.filter((row) => ids.includes(row.id))
+        .map((row) => row.poNo)
+        .join(", ");
+
+      toast.success(`Request(s): ${porefNo} marked as ${status}`);
+
+      // 3. Clear selection and refresh data
+      setSelectedRows([]);
+      setIsBulkDropdownOpen(false);
+
+      if (sno) {
+        dispatch(fetchApprovalDetails(sno));
+      }
+
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      toast.error("Failed to update status. Please try again.");
+    }
   };
 
   const handleApplyFilters = (newFilters) => {

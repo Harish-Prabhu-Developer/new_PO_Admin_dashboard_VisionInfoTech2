@@ -22,8 +22,21 @@ export const fetchApprovalDetails = createAsyncThunk(
         try {
             const response = await axios.get(`${BASE_URL}/approval-details/${sno}`, getHeader());
             console.log(response);
-            
+
             return response.data; // Expecting { length: number, rows: [] }
+        } catch (error) {
+            throw error;
+        }
+    }
+);
+
+// Async Thunk to Update Approval Status
+export const updateApprovalStatus = createAsyncThunk(
+    'approvalDetails/updateApprovalStatus',
+    async ({ ids, status, remarks }) => {
+        try {
+            const response = await axios.post(`${BASE_URL}/update-status`, { ids, status, remarks }, getHeader());
+            return response.data;
         } catch (error) {
             throw error;
         }
@@ -55,6 +68,19 @@ const approvalDetailsSlice = createSlice({
                 console.log(state.data);
             })
             .addCase(fetchApprovalDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error;
+            })
+            // Update Approval Status
+            .addCase(updateApprovalStatus.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateApprovalStatus.fulfilled, (state) => {
+                state.loading = false;
+                // We'll let the component trigger a refetch or we could update local state here
+            })
+            .addCase(updateApprovalStatus.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error;
             });

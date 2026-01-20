@@ -241,6 +241,15 @@ const FilterForm = ({
               />
             </div>
           </InputWrapper>
+          <InputWrapper label="PO Roll No">
+            <input
+              type="text"
+              placeholder="Enter PO Roll No"
+              value={localFilters.poRollNo || ""}
+              onChange={(e) => handleChange("poRollNo", e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[14px] font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-300"
+            />
+          </InputWrapper>
         </div>
 
         {/* Advanced Toggle */}
