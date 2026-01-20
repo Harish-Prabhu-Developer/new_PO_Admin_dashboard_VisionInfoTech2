@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ApprovalDetailsPage from "./pages/ApprovalDetailsPage";
 import ViewDetailPage from "./pages/ViewDetailPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import {
   BrowserRouter as Router,
   Routes,
@@ -34,7 +35,7 @@ function PublicRoute() {
 
 /* -------------------- App -------------------- */
 
-const App=()=> {
+const App = () => {
   return (
     <Router>
       <Routes>
@@ -47,6 +48,7 @@ const App=()=> {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="dashboard">
               <Route index element={<DashboardPage />} />
               <Route path=":approvalType">

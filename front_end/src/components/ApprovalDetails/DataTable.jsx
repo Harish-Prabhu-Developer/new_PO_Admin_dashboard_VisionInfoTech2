@@ -1,9 +1,9 @@
 // src/components/ApprovalDetails/DataTable.jsx
 import React, { useState, useMemo } from "react";
-import { 
-  ChevronUp, 
-  ChevronDown, 
-  Download, 
+import {
+  ChevronUp,
+  ChevronDown,
+  Download,
   ChevronRight,
   ChevronLeft,
   ChevronsLeft,
@@ -19,62 +19,62 @@ import PaginationComponent from "./Pagination";
  * A highly reusable and dynamic DataTable component.
  * Implements the "Old Theme" style from the provided images.
  */
-const DataTable = ({ 
-  data = [], 
-  columns = [], 
+const DataTable = ({
+  data = [],
+  columns = [],
   rowKey = "id",
   title,
   subTitle,
   isLoading = false,
-  
+
   // Selection
   selection = {
     enabled: true,
     selectedRows: [],
-    onSelectedRowsChange: () => {}
+    onSelectedRowsChange: () => { }
   },
-  
+
   // Expansion
   expansion = {
     enabled: false,
     expandedRows: [],
     expandedColumns: [],
-    onExpandedRowsChange: () => {},
+    onExpandedRowsChange: () => { },
     renderExpansion: null
   },
-  
+
   totalRows = null,
-  
+
   // Pagination
   pagination = {
     enabled: true,
     currentPage: 1,
     itemsPerPage: 10,
-    onPageChange: () => {},
-    onItemsPerPageChange: () => {}
+    onPageChange: () => { },
+    onItemsPerPageChange: () => { }
   },
-  
+
   // Sorting
   sorting = {
     enabled: true,
     sortConfig: { key: null, direction: 'asc' },
-    onSortChange: () => {}
+    onSortChange: () => { }
   },
-  
+
   // Export
   exportOptions = {
     enabled: true,
     onExport: (format) => console.log(`Export as ${format}`),
     formats: ['csv', 'excel', 'pdf']
   },
-  
+
   // Custom Components/Elements
   bulkActions = null,
   toolbarActions = null,
   emptyMessage = "No records found",
   showSearch = false,
-  onSearch = () => {},
-  
+  onSearch = () => { },
+
   // Internal State Fallbacks
   useInternalState = {
     selection: true,
@@ -103,8 +103,8 @@ const DataTable = ({
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
     const lowerSearch = searchTerm.toLowerCase();
-    return data.filter(row => 
-      Object.values(row).some(val => 
+    return data.filter(row =>
+      Object.values(row).some(val =>
         String(val).toLowerCase().includes(lowerSearch)
       )
     );
@@ -112,11 +112,11 @@ const DataTable = ({
 
   const sortedData = useMemo(() => {
     if (!effectiveSortConfig.key) return filteredData;
-    
+
     return [...filteredData].sort((a, b) => {
       const aValue = a[effectiveSortConfig.key];
       const bValue = b[effectiveSortConfig.key];
-      
+
       if (aValue === bValue) return 0;
       if (aValue < bValue) return effectiveSortConfig.direction === 'asc' ? -1 : 1;
       return effectiveSortConfig.direction === 'asc' ? 1 : -1;
@@ -126,7 +126,7 @@ const DataTable = ({
   const effectiveTotalItems = totalRows !== null ? totalRows : sortedData.length;
   const isPaginationAll = effectiveItemsPerPage === 'all';
   const totalPages = isPaginationAll ? 1 : Math.ceil(effectiveTotalItems / effectiveItemsPerPage);
-  
+
   const paginatedData = useMemo(() => {
     if (isPaginationAll || !pagination.enabled) return sortedData;
     const start = (effectiveCurrentPage - 1) * effectiveItemsPerPage;
@@ -167,7 +167,7 @@ const DataTable = ({
     const newSelected = effectiveSelectedRows.includes(id)
       ? effectiveSelectedRows.filter(rowId => rowId !== id)
       : [...effectiveSelectedRows, id];
-    
+
     if (useInternalState.selection) setInternalSelectedRows(newSelected);
     selection.onSelectedRowsChange?.(newSelected);
   };
@@ -175,23 +175,23 @@ const DataTable = ({
   const handleSelectAll = (e) => {
     const isChecked = e.target.checked;
     const pageIds = paginatedData.map(row => row[rowKey]);
-    
+
     let newSelected;
     if (isChecked) {
       newSelected = [...new Set([...effectiveSelectedRows, ...pageIds])];
     } else {
       newSelected = effectiveSelectedRows.filter(id => !pageIds.includes(id));
     }
-    
+
     if (useInternalState.selection) setInternalSelectedRows(newSelected);
     selection.onSelectedRowsChange?.(newSelected);
   };
 
   const toggleRowExpansion = (id) => {
-    const newExpanded = effectiveExpandedRows.includes(id) 
-      ? effectiveExpandedRows.filter(rowId => rowId !== id) 
+    const newExpanded = effectiveExpandedRows.includes(id)
+      ? effectiveExpandedRows.filter(rowId => rowId !== id)
       : [...effectiveExpandedRows, id];
-    
+
     if (useInternalState.expansion) setInternalExpandedRows(newExpanded);
     expansion.onExpandedRowsChange?.(newExpanded);
   };
@@ -203,8 +203,8 @@ const DataTable = ({
   }, [expansion.expandedColumns, columns]);
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
-      
+    <div className="flex flex-col w-full max-w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+
       {/* Table Toolbar (Matching Image) */}
       <div className="bg-white px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100">
         <div>
@@ -220,7 +220,7 @@ const DataTable = ({
           <div className="flex items-center space-x-2">
             <span className="text-[13px] text-slate-500 font-semibold">Show:</span>
             <div className="relative">
-              <select 
+              <select
                 value={effectiveItemsPerPage}
                 onChange={handleItemsPerPageChange}
                 className="appearance-none bg-gray-50/50 border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-[13px] font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-100"
@@ -235,7 +235,7 @@ const DataTable = ({
 
           {exportOptions.enabled && (
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowExportMenu(!showExportMenu)}
                 className="flex items-center space-x-2 px-4 py-1.5 bg-white border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 hover:bg-slate-50 transition-all outline-none"
               >
@@ -243,7 +243,7 @@ const DataTable = ({
                 <span>Export</span>
                 <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
               </button>
-              
+
               {showExportMenu && (
                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 animate-in zoom-in-95 duration-200 origin-top-right">
                   {exportOptions.formats.map(format => (
@@ -275,23 +275,23 @@ const DataTable = ({
       )}
 
       {/* Main Table Area */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto w-full">
+        <table className="min-w-full text-left border-collapse">
           <thead className="bg-[#c7d2fe]/50 border-b border-gray-200">
             <tr>
               {selection.enabled && (
                 <th className="w-12 px-4 py-3.5 text-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     onChange={handleSelectAll}
                     checked={paginatedData.length > 0 && paginatedData.every(row => effectiveSelectedRows.includes(row[rowKey]))}
                     className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                 </th>
               )}
-              
+
               {columns.map((col, idx) => (
-                <th 
+                <th
                   key={col.key || idx}
                   onClick={() => handleSort(col.key)}
                   className={`px-4 py-3.5 text-[11px] font-black text-slate-600 uppercase tracking-widest cursor-pointer hover:bg-indigo-100/50 transition-colors whitespace-nowrap ${col.responsiveClass || ''}`}
@@ -313,7 +313,7 @@ const DataTable = ({
               )}
             </tr>
           </thead>
-          
+
           <tbody className="divide-y divide-slate-100">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
@@ -335,21 +335,21 @@ const DataTable = ({
                   <tr className={`hover:bg-slate-50/50 transition-colors ${effectiveSelectedRows.includes(row[rowKey]) ? 'bg-indigo-50/30' : ''}`}>
                     {selection.enabled && (
                       <td className="px-4 py-3.5 text-center">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={effectiveSelectedRows.includes(row[rowKey])}
                           onChange={() => handleRowSelect(row[rowKey])}
                           className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                         />
                       </td>
                     )}
-                    
+
                     {columns.map((col, colIdx) => (
-                      <td 
+                      <td
                         key={col.key || colIdx}
-                        className={`px-4 py-3.5 text-[13px] text-slate-700 ${col.responsiveClass || ''}`}
+                        className={`px-4 py-3.5 text-[13px] text-slate-700 whitespace-nowrap ${col.responsiveClass || ''}`}
                       >
-                        {col.render ? col.render(row[col.key], row, { 
+                        {col.render ? col.render(row[col.key], row, {
                           isExpanded: effectiveExpandedRows.includes(row[rowKey]),
                           toggleExpansion: () => toggleRowExpansion(row[rowKey])
                         }) : (
@@ -362,7 +362,7 @@ const DataTable = ({
 
                     {expansion.enabled && !expansion.hideExpansionColumn && (
                       <td className="px-4 py-3.5 text-center">
-                        <button 
+                        <button
                           onClick={() => toggleRowExpansion(row[rowKey])}
                           className={`p-1.5 rounded-full transition-transform ${effectiveExpandedRows.includes(row[rowKey]) ? 'rotate-180 text-indigo-600 bg-indigo-50' : 'text-slate-400 hover:text-indigo-500 hover:bg-slate-100'}`}
                         >
@@ -400,7 +400,7 @@ const DataTable = ({
 
       {/* Refined Modular Pagination Footer */}
       {pagination.enabled && (
-        <PaginationComponent 
+        <PaginationComponent
           currentPage={effectiveCurrentPage}
           totalPages={totalPages}
           totalFilteredCount={effectiveTotalItems}

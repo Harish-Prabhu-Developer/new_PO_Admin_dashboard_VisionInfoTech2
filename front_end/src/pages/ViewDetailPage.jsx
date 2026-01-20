@@ -43,7 +43,7 @@ const ViewDetailPage = () => {
     const statusText = status || "PENDING";
     let bgColor = "bg-gray-100";
     let textColor = "text-gray-800";
-    
+
     switch (statusText.toUpperCase()) {
       case "APPROVED":
         bgColor = "bg-green-100";
@@ -65,7 +65,7 @@ const ViewDetailPage = () => {
         bgColor = "bg-gray-100";
         textColor = "text-gray-800";
     }
-    
+
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${bgColor} ${textColor}`}>
         {statusText}
@@ -88,15 +88,15 @@ const ViewDetailPage = () => {
   };
 
   // Action buttons
-  const actionButtons = [
-    {
-      label: "Download",
-      icon: <Download className="w-4 h-4" />,
-      onClick: () => console.log("Download PO", rowData.poNo),
-      variant: "outline"
-    },
-    
-  ];
+  // const actionButtons = [
+  //   {
+  //     label: "Download",
+  //     icon: <Download className="w-4 h-4" />,
+  //     onClick: () => console.log("Download PO", rowData.poNo),
+  //     variant: "outline"
+  //   },
+
+  // ];
 
   // Main details sections
   const detailSections = [
@@ -168,7 +168,7 @@ const ViewDetailPage = () => {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </button>
-            {actionButtons.map((button, index) => (
+            {/* {actionButtons.map((button, index) => (
               <button
                 key={index}
                 onClick={button.onClick}
@@ -181,12 +181,12 @@ const ViewDetailPage = () => {
                 {button.icon}
                 <span>{button.label}</span>
               </button>
-            ))}
+            ))} */}
           </div>
         </div>
       </div>
 
-      
+
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

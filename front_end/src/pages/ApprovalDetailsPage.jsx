@@ -7,17 +7,13 @@ import FilterForm from "../components/ApprovalDetails/FilterForm";
 import DataTable from "../components/ApprovalDetails/DataTable";
 import {
   Eye,
-  ChevronUp,
   ChevronDown,
   Layers,
-  TrendingUp,
   Clock,
   CheckCircle,
   XCircle,
   RefreshCw,
   Settings,
-  Send,
-  Trash2
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -78,19 +74,27 @@ const getTableColumns = (onViewDetails) => [
       </div>
     )
   },
+  {
+    key: 'finalStatus',
+    label: 'Final Status',
+    render: (value) => {
+      const status = (value || 'PENDING').toUpperCase();
+      let styles = "bg-slate-100 text-slate-600 border-slate-200";
+
+      if (status.includes('APPROVED')) styles = "bg-emerald-50 text-emerald-700 border-emerald-200";
+      else if (status.includes('PENDING')) styles = "bg-yellow-50 text-yellow-700 border-yellow-200";
+      else if (status.includes('REJECTED')) styles = "bg-red-50 text-red-700 border-red-200";
+      else if (status.includes('HOLD')) styles = "bg-blue-50 text-blue-700 border-blue-200";
+
+      return (
+        <span className={`px-2 py-1 text-[10px] font-black rounded border ${styles}`}>
+          {value || 'PENDING'}
+        </span>
+      );
+    }
+  },
 ];
 
-// Expanded Secondary columns (shown in the row expansion area)
-const getExpandedColumns = () => [
-  { key: 'comp', label: 'Company' },
-  { key: 'department', label: 'Department' },
-  { key: 'requestedBy', label: 'Requested By' },
-  { key: 'pendingDays', label: 'Pending Since', render: (val) => `${val} Days` },
-  { key: 'cell', label: 'Source Cell' },
-  { key: 'currency', label: 'Base Currency' },
-  { key: 'response1Person', label: 'Reviewer 1' },
-  { key: 'response2Person', label: 'Director' },
-];
 
 const ApprovalDetailsPage = () => {
   const location = useLocation();
@@ -112,6 +116,7 @@ const ApprovalDetailsPage = () => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [expandedRows, setExpandedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isBulkDropdownOpen, setIsBulkDropdownOpen] = useState(false);
 
   // Fetch Data on Mount
   useEffect(() => {
@@ -134,6 +139,32 @@ const ApprovalDetailsPage = () => {
     return approvalType.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }, [cardTitle, approvalType]);
 
+  // Extract dynamic options from data
+  const { companyOptions, supplierOptions, departmentOptions, purchaseTypeOptions, statusOptions } = useMemo(() => {
+    const data = approvalData?.rows || [];
+    const companies = new Set();
+    const suppliers = new Set();
+    const departments = new Set();
+    const purchaseTypes = new Set();
+    const statuses = new Set();
+
+    data.forEach(item => {
+      if (item.comp) companies.add(item.comp);
+      if (item.supplier) suppliers.add(item.supplier);
+      if (item.department) departments.add(item.department);
+      if (item.poType) purchaseTypes.add(item.poType);
+      if (item.finalStatus) statuses.add(item.finalStatus);
+    });
+
+    return {
+      companyOptions: Array.from(companies).map(c => ({ value: c, label: c })),
+      supplierOptions: Array.from(suppliers).map(s => ({ value: s, label: s })),
+      departmentOptions: Array.from(departments).map(d => ({ value: d, label: d })),
+      purchaseTypeOptions: Array.from(purchaseTypes).map(p => ({ value: p, label: p })),
+      statusOptions: Array.from(statuses).map(s => ({ value: s, label: s })),
+    };
+  }, [approvalData]);
+
   // Combined Data Filtering logic for all parameters
   const filteredData = useMemo(() => {
     // Use Redux Data rows instead of mockTableData
@@ -146,21 +177,23 @@ const ApprovalDetailsPage = () => {
 
     return data.filter(item => {
       // 1. Company Filter
-      if (filters.company && item.comp.toLowerCase() !== filters.company.toLowerCase()) return false;
+      if (filters.company && item.comp) {
+        if (item.comp.toLowerCase() !== filters.company.toLowerCase()) return false;
+      }
 
       // 2. Purchase Type Filter
-      if (filters.purchaseType && filters.purchaseType !== 'all' && item.poType.toLowerCase() !== filters.purchaseType.toLowerCase()) return false;
+      if (filters.purchaseType && filters.purchaseType !== 'all') {
+        if (!item.poType || item.poType.toLowerCase() !== filters.purchaseType.toLowerCase()) return false;
+      }
 
       // 3. Supplier Filter
       if (filters.supplier && filters.supplier !== 'all') {
-        const supplierMatch = item.supplier.toLowerCase().includes(filters.supplier.toLowerCase());
-        if (!supplierMatch) return false;
+        if (!item.supplier || !item.supplier.toLowerCase().includes(filters.supplier.toLowerCase())) return false;
       }
 
       // 4. Department Filter
       if (filters.department && filters.department !== 'all') {
-        const deptMatch = item.department.toLowerCase().includes(filters.department.replace('-', ' ').toLowerCase());
-        if (!deptMatch) return false;
+        if (!item.department || !item.department.toLowerCase().includes(filters.department.toLowerCase())) return false;
       }
 
       // 5. Status Filter
@@ -170,14 +203,19 @@ const ApprovalDetailsPage = () => {
       }
 
       // 6. PO Number / Roll No Search
-      if (filters.poRollNo && !item.poNo.toLowerCase().includes(filters.poRollNo.toLowerCase())) return false;
+      if (filters.poRollNo) {
+        if (!item.poNo || !item.poNo.toLowerCase().includes(filters.poRollNo.toLowerCase())) return false;
+      }
 
       // 7. Currency Filter
-      if (filters.currency && item.currency !== filters.currency) return false;
+      if (filters.currency) {
+        if (item.currency !== filters.currency) return false;
+      }
 
       // 8. Amount Range Filters
       if (filters.minAmount || filters.maxAmount) {
-        const numericAmount = parseFloat(item.amount.replace(/,/g, ''));
+        // Remove commas and convert to float
+        const numericAmount = parseFloat((item.amount || '0').toString().replace(/,/g, ''));
         if (filters.minAmount && numericAmount < parseFloat(filters.minAmount)) return false;
         if (filters.maxAmount && numericAmount > parseFloat(filters.maxAmount)) return false;
       }
@@ -192,9 +230,10 @@ const ApprovalDetailsPage = () => {
     });
   }, [filters, approvalData]);
 
-  const handleBulkApprove = (ids) => {
-    toast.success(`Broadcasting approval for ${ids.length} requests...`);
+  const handleBulkStatusChange = (ids, status) => {
+    toast.success(`Broadcasting ${status} status for ${ids.length} requests...`);
     setSelectedRows([]);
+    setIsBulkDropdownOpen(false);
   };
 
   const handleApplyFilters = (newFilters) => {
@@ -205,7 +244,7 @@ const ApprovalDetailsPage = () => {
 
   const handleResetFilters = () => {
     setFilters({});
-    toast('Filters cleared', { icon: '🧹' });
+    toast.success('Filters cleared');
   };
 
   const handleViewDetails = React.useCallback((row) => {
@@ -226,6 +265,11 @@ const ApprovalDetailsPage = () => {
           onReset={handleResetFilters}
           isLoading={isLoading}
           title={`Filter ${pageTitle} Requests`}
+          companyOptions={companyOptions}
+          supplierOptions={supplierOptions}
+          departmentOptions={departmentOptions}
+          purchaseTypeOptions={purchaseTypeOptions}
+          statusOptions={statusOptions}
         />
 
         {/* Dynamic Data Table Implementation */}
@@ -372,20 +416,40 @@ const ApprovalDetailsPage = () => {
 
           // Bulk Actions Implementation
           bulkActions={(ids) => (
-            <div className="flex items-center space-x-3">
+            <div className="relative">
               <button
-                onClick={() => handleBulkApprove(ids)}
-                className="px-4 py-1 bg-white text-indigo-700 rounded text-xs font-black flex items-center space-x-2 hover:bg-indigo-50 transition-colors shadow-sm"
+                onClick={() => setIsBulkDropdownOpen(!isBulkDropdownOpen)}
+                className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold flex items-center space-x-2 hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200"
               >
-                <Send size={12} />
-                <span>Bulk Approve</span>
+                <span>Change Status</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isBulkDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
-              <button
-                className="px-4 py-1 bg-red-500 text-white rounded text-xs font-black flex items-center space-x-2 hover:bg-red-600 transition-colors shadow-sm"
-              >
-                <Trash2 size={12} />
-                <span>Move to Archive</span>
-              </button>
+
+              {isBulkDropdownOpen && (
+                <div className="absolute top-full mt-2 left-0 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200">
+                  <button
+                    onClick={() => handleBulkStatusChange(ids, 'APPROVED')}
+                    className="w-full text-left px-4 py-2.5 text-[12px] font-bold text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 flex items-center space-x-3 transition-colors"
+                  >
+                    <CheckCircle size={14} />
+                    <span>Mark as Approved</span>
+                  </button>
+                  <button
+                    onClick={() => handleBulkStatusChange(ids, 'PENDING')}
+                    className="w-full text-left px-4 py-2.5 text-[12px] font-bold text-slate-600 hover:bg-amber-50 hover:text-amber-600 flex items-center space-x-3 transition-colors"
+                  >
+                    <Clock size={14} />
+                    <span>Mark as Pending</span>
+                  </button>
+                  <button
+                    onClick={() => handleBulkStatusChange(ids, 'HOLD')}
+                    className="w-full text-left px-4 py-2.5 text-[12px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-800 flex items-center space-x-3 transition-colors"
+                  >
+                    <XCircle size={14} />
+                    <span>Mark as Hold</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

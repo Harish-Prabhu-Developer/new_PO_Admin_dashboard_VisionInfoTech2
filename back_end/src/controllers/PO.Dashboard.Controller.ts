@@ -60,7 +60,7 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
         // Extract parameters from request params
         const { sno } = req.params;
         
-        console.log("Approval Details Request Params (sno):", sno);
+       
 
         if (!sno) {
             return res.status(400).json({ error: 'Dashboard Card ID (sno) is required' });
@@ -69,6 +69,7 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
         // 1. Validate: Check if the Dashboard Card exists
         // We use the sno to verify if it's a valid dashboard card requesting data
         const dashboardResult = await query(`SELECT * FROM ${TABLE_DASHBOARD} WHERE sno = $1`, [sno]);
+        console.log("dashboardResult", dashboardResult.rows[0].card_value);
         
         if (dashboardResult.rows.length === 0) {
             return res.status(404).json({ error: 'Dashboard Card not found' });
@@ -106,12 +107,20 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
                 EXTRACT(DAY FROM (NOW() - h.po_date))::TEXT as "pendingDays",
                 
                 -- Response 1
-                COALESCE(h.response_1_person, 'Pending') as "response1Person",
+                CASE 
+                    WHEN h.response_1_person IS NOT NULL AND h.response_1_date IS NOT NULL THEN CONCAT(h.response_1_person, ' / ', TO_CHAR(h.response_1_date, 'DD-Mon-YYYY HH24:MI:SS'))
+                    WHEN h.response_1_person IS NOT NULL THEN h.response_1_person
+                    ELSE 'Pending'
+                END as "response1Person",
                 COALESCE(h.response_1_status, 'PENDING') as "response1Status",
                 COALESCE(h.response_1_remarks, '') as "response1Remarks",
                 
                 -- Response 2
-                COALESCE(h.response_2_person, 'Pending') as "response2Person",
+                CASE 
+                    WHEN h.response_2_person IS NOT NULL AND h.response_2_date IS NOT NULL THEN CONCAT(h.response_2_person, ' / ', TO_CHAR(h.response_2_date, 'DD-Mon-YYYY HH24:MI:SS'))
+                    WHEN h.response_2_person IS NOT NULL THEN h.response_2_person
+                    ELSE 'Pending'
+                END as "response2Person",
                 COALESCE(h.response_2_status, 'PENDING') as "response2Status",
                 COALESCE(h.response_2_remarks, '') as "response2Remarks",
                 
@@ -124,44 +133,23 @@ export const getApprovalDetails = async (req: Request, res: Response) => {
         `;
 
         const result = await query(sqlQuery);
-
+        
+        
         // If DB has data, return it
-        if (result.rows.length > 0) {
-            return res.status(200).json({
-                length: result.rows.length,
-                rows: result.rows
-            });
-        }
+        // if (result.rows.length > 0) {
+        //     return res.status(200).json({
+        //         length: result.rows.length,
+        //         rows: result.rows
+        //     });
+        // }
 
-        // Fallback: If DB is empty, return Mock Data (for demo/development purposes)
+        // // Fallback: If DB is empty, return Mock Data (for demo/development purposes)
         const mockTableData = [
-            {
-                id: 1,
-                cell: "A1",
-                comp: "AZ",
-                poNo: "AZ/MOFF/25-28/PO/2568",
-                poType: "DOMESTIC",
-                supplier: "ADDAMO MARINA HARDWARE",
-                product: "RED SILICON B50/PC",
-                company: "AZ",
-                department: "ATOZ 1 DEPT",
-                amount: "29,500",
-                currency: "TSH",
-                requestedBy: "raw / 07-Jan-2026",
-                pendingDays: "0",
-                response1Person: "Mr. Kalpesh",
-                response1Status: "APPROVED",
-                response1Remarks: "Quality checked",
-                response2Person: "Shaaf",
-                response2Status: "PENDING",
-                response2Remarks: "",
-                finalStatus: "HOLD",
-            },
-            ...Array.from({ length: 15 }, (_, i) => ({
+            ...Array.from({ length: dashboardResult.rows[0].card_value }, (_, i) => ({
                 id: i + 2,
                 cell: `A${i + 2}`,
                 comp: "AZ",
-                poNo: `AZ/MOFF/25-28/PO/25${60 + i}`,
+                poNo: `PO-2026-00${60 + i}`,
                 poType: i % 2 === 0 ? "DOMESTIC" : "IMPORT",
                 supplier: i % 3 === 0 ? "ADDAMO MARINA HARDWARE" : i % 3 === 1 ? "VISION INFOTECH LTD" : "POLYFOAM LIMITED",
                 product: `Industrial Part ${i + 101}`,

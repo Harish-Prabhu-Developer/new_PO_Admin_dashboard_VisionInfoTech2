@@ -23,34 +23,7 @@ import ProfileModal from '../components/ProfileModal';
 // Import all icons for the sidebar
 import {
   FileCheck,
-  Wallet,
-  CreditCard,
-  Tag,
-  PackageCheck,
-  Building2,
-  RotateCcw,
-  DoorOpen,
-  Boxes,
-  UserPlus,
-  Trash2,
-  ClipboardList,
-  Factory,
-  Scissors,
-  Plane,
-  ReceiptText,
-  ShoppingCart,
-  Shirt,
-  ShieldCheck,
-  Clock,
-  HandCoins,
-  LockKeyhole,
-  Home
-} from "lucide-react";
-import Footer from '../components/Footer';
-
-const iconMap = {
-  LayoutDashboard,
-  FileCheck,
+  FileSignature,
   Wallet,
   CreditCard,
   Tag,
@@ -73,7 +46,67 @@ const iconMap = {
   HandCoins,
   LockKeyhole,
   Home,
-  Bell
+  Hammer,
+  Wrench,
+  Microscope,
+  Truck,
+  Ship,
+  Users,
+  Presentation,
+  FileBarChart,
+  PieChart,
+  Settings,
+  Receipt,
+  PiggyBank,
+  Landmark,
+  Warehouse,
+  Container
+} from "lucide-react";
+import Footer from '../components/Footer';
+import Notification from '../components/common/Notification';
+
+const iconMap = {
+  LayoutDashboard,
+  FileCheck,
+  FileSignature,
+  Wallet,
+  CreditCard,
+  Tag,
+  PackageCheck,
+  Building2,
+  RotateCcw,
+  DoorOpen,
+  Boxes,
+  UserPlus,
+  Trash2,
+  ClipboardList,
+  Factory,
+  Scissors,
+  Plane,
+  ReceiptText,
+  ShoppingCart,
+  Shirt,
+  ShieldCheck,
+  Clock,
+  HandCoins,
+  LockKeyhole,
+  Home,
+  Bell,
+  Hammer,
+  Wrench,
+  Microscope,
+  Truck,
+  Ship,
+  Users,
+  Presentation,
+  FileBarChart,
+  PieChart,
+  Settings,
+  Receipt,
+  PiggyBank,
+  Landmark,
+  Warehouse,
+  Container
 };
 
 const Layout = ({ children }) => {
@@ -288,7 +321,8 @@ const Layout = ({ children }) => {
 
             {/* Right Group: Fullscreen, Profile */}
             <div className="flex items-center space-x-2 md:space-x-4">
-              <div className="hidden sm:block">
+              <div className="flex items-center space-x-2">
+                <Notification />
                 <FullscreenToggle />
               </div>
               <ProfileModal />
@@ -304,8 +338,8 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Dynamic Page Container */}
-        <main className="flex-1 w-full p-2 sm:p-4 lg:p-6 overflow-x-hidden overflow-y-auto bg-slate-50/50">
-          <div className="max-w-400 mx-auto w-full">
+        <main className="flex-1 w-full p-2 sm:p-4 lg:p-6 overflow-y-auto bg-slate-50/50">
+          <div className="max-w-full">
             {children || <Outlet />}
           </div>
           {/* our Footer */}

@@ -2,30 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { getIconForTitle } from "../utils/IconHelper";
 import { useNavigate } from "react-router-dom";
-import {
-  FileCheck,
-  Wallet,
-  CreditCard,
-  Tag,
-  PackageCheck,
-  Building2,
-  RotateCcw,
-  DoorOpen,
-  Boxes,
-  UserPlus,
-  Trash2,
-  ClipboardList,
-  Factory,
-  Scissors,
-  Plane,
-  ReceiptText,
-  ShoppingCart,
-  Shirt,
-  ShieldCheck,
-  Clock,
-  HandCoins,
-  LockKeyhole,
-} from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
@@ -53,28 +30,47 @@ const DashboardPage = () => {
 
   // Icon map (used only in this component)
   const iconMap = {
-    FileCheck,
-    Wallet,
-    CreditCard,
-    Tag,
-    PackageCheck,
-    Building2,
-    RotateCcw,
-    DoorOpen,
-    Boxes,
-    UserPlus,
-    Trash2,
-    ClipboardList,
-    Factory,
-    Scissors,
-    Plane,
-    ReceiptText,
-    ShoppingCart,
-    Shirt,
-    ShieldCheck,
-    Clock,
-    HandCoins,
-    LockKeyhole,
+    FileCheck: LucideIcons.FileCheck,
+    FileSignature: LucideIcons.FileSignature,
+    Wallet: LucideIcons.Wallet,
+    CreditCard: LucideIcons.CreditCard,
+    Tag: LucideIcons.Tag,
+    PackageCheck: LucideIcons.PackageCheck,
+    Building2: LucideIcons.Building2,
+    RotateCcw: LucideIcons.RotateCcw,
+    DoorOpen: LucideIcons.DoorOpen,
+    Boxes: LucideIcons.Boxes,
+    UserPlus: LucideIcons.UserPlus,
+    Trash2: LucideIcons.Trash2,
+    ClipboardList: LucideIcons.ClipboardList,
+    Factory: LucideIcons.Factory,
+    Scissors: LucideIcons.Scissors,
+    Plane: LucideIcons.Plane,
+    ReceiptText: LucideIcons.ReceiptText,
+    ShoppingCart: LucideIcons.ShoppingCart,
+    Shirt: LucideIcons.Shirt,
+    ShieldCheck: LucideIcons.ShieldCheck,
+    Clock: LucideIcons.Clock,
+    HandCoins: LucideIcons.HandCoins,
+    LockKeyhole: LucideIcons.LockKeyhole,
+    Home: LucideIcons.Home,
+    Hammer: LucideIcons.Hammer,
+    Wrench: LucideIcons.Wrench,
+    Microscope: LucideIcons.Microscope,
+    Truck: LucideIcons.Truck,
+    Ship: LucideIcons.Ship,
+    Users: LucideIcons.Users,
+    Presentation: LucideIcons.Presentation,
+    FileBarChart: LucideIcons.FileBarChart,
+    PieChart: LucideIcons.PieChart,
+    Settings: LucideIcons.Settings,
+    Receipt: LucideIcons.Receipt,
+    PiggyBank: LucideIcons.PiggyBank,
+    Landmark: LucideIcons.Landmark,
+    Warehouse: LucideIcons.Warehouse,
+    Container: LucideIcons.Container,
+    Bell: LucideIcons.Bell,
+    LayoutDashboard: LucideIcons.LayoutDashboard
   };
 
   const handleCardClick = (card) => {
@@ -103,7 +99,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 px-2 py-4">
-      <div className="max-w-350 mx-auto">
+      <div className="max-w-full">
         <div className="mb-10">
           <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">

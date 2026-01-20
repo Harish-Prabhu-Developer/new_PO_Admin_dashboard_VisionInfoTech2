@@ -8,6 +8,7 @@ import poAddCostDetail2Reducer from './Slice/PO.AddCostDetail2.Slice';
 import poConversationDetail3Reducer from './Slice/PO.ConversationDetail3.Slice';
 import poDashboardReducer from './Slice/PO.Dashboard.Slice';
 import approvalDetailsReducer from './Slice/ApprovalDetails.Slice';
+import notificationReducer from './Slice/Notification.Slice';
 
 const Store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ const Store = configureStore({
     poConversationDetail3: poConversationDetail3Reducer,
     poDashboard: poDashboardReducer,
     approvalDetails: approvalDetailsReducer,
+    notification: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
