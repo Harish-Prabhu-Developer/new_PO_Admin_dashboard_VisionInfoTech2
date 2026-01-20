@@ -117,6 +117,9 @@ const ApprovalDetailsPage = () => {
   const [expandedRows, setExpandedRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isBulkDropdownOpen, setIsBulkDropdownOpen] = useState(false);
+  const [isRemarksModalOpen, setIsRemarksModalOpen] = useState(false);
+  const [remarksInput, setRemarksInput] = useState("");
+  const [pendingStatusUpdate, setPendingStatusUpdate] = useState(null);
 
   // Fetch Data on Mount
   useEffect(() => {
@@ -230,12 +233,26 @@ const ApprovalDetailsPage = () => {
     });
   }, [filters, approvalData]);
 
-  const handleBulkStatusChange = async (ids, status) => {
-    // 1. Dispatch the update action
-    try {
-      await dispatch(updateApprovalStatus({ ids, status })).unwrap();
+  const handleBulkStatusChange = (ids, status) => {
+    // Open Modal instead of direct dispatch
+    setPendingStatusUpdate({ ids, status });
+    setRemarksInput(""); // Reset remarks
+    setIsRemarksModalOpen(true);
+    setIsBulkDropdownOpen(false);
+  };
 
-      // 2. Determine PO Numbers for success message
+  const confirmStatusChange = async () => {
+    if (!pendingStatusUpdate || !remarksInput.trim()) return;
+
+    const { ids, status } = pendingStatusUpdate;
+
+    try {
+      await dispatch(updateApprovalStatus({
+        ids,
+        status,
+        remarks: remarksInput
+      })).unwrap();
+
       const porefNo = approvalData?.rows
         ?.filter((row) => ids.includes(row.id))
         .map((row) => row.poNo)
@@ -243,9 +260,9 @@ const ApprovalDetailsPage = () => {
 
       toast.success(`Request(s): ${porefNo} marked as ${status}`);
 
-      // 3. Clear selection and refresh data
       setSelectedRows([]);
-      setIsBulkDropdownOpen(false);
+      setIsRemarksModalOpen(false);
+      setPendingStatusUpdate(null);
 
       if (sno) {
         dispatch(fetchApprovalDetails(sno));
@@ -501,6 +518,55 @@ const ApprovalDetailsPage = () => {
             </div>
           ))}
         </div>
+
+        {/* Modal for Remarks */}
+        {isRemarksModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all scale-100 p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                <h3 className="text-lg font-bold text-slate-800">Status Confirmation</h3>
+                <button
+                  onClick={() => setIsRemarksModalOpen(false)}
+                  className="p-1 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+                >
+                  <XCircle size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm text-slate-500 font-medium">
+                  You are about to mark <span className="text-indigo-600 font-bold">{pendingStatusUpdate?.ids?.length} request(s)</span> as <span className={`font-bold ${pendingStatusUpdate?.status === 'APPROVED' ? 'text-emerald-600' : pendingStatusUpdate?.status === 'REJECTED' ? 'text-rose-600' : 'text-amber-600'}`}>{pendingStatusUpdate?.status}</span>.
+                </p>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Remarks / Comments <span className="text-rose-500">*</span></label>
+                  <textarea
+                    value={remarksInput}
+                    onChange={(e) => setRemarksInput(e.target.value)}
+                    placeholder="Enter mandatory remarks for this action..."
+                    className="w-full h-24 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none transition-all placeholder:text-slate-400 text-slate-700"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-2">
+                <button
+                  onClick={() => setIsRemarksModalOpen(false)}
+                  className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmStatusChange}
+                  disabled={!remarksInput.trim()}
+                  className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-lg shadow-indigo-200 transition-all flex items-center space-x-2"
+                >
+                  <span>Confirm Update</span>
+                  {isLoading && <RefreshCw size={14} className="animate-spin" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
