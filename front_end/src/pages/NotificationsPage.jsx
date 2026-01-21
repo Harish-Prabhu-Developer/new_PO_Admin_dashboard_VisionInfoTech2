@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
     fetchNotifications,
-    markNotificationRead,
-    markAllNotificationsRead,
-    removeNotification,
-    removeAllNotifications
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAllNotifications
 } from '../redux/Slice/Notification.Slice';
 import {
     Bell,
@@ -65,29 +65,29 @@ const NotificationsPage = () => {
     });
 
     const handleMarkAsRead = (id) => {
-        dispatch(markNotificationRead(id));
+        dispatch(markAsRead(id));
     };
 
     const handleNotificationClick = (notification) => {
-        dispatch(markNotificationRead(notification.id));
+        dispatch(markAsRead(notification.id));
         if (notification.link) {
             navigate(notification.link);
         }
     };
 
     const handleDeleteNotification = (id) => {
-        dispatch(removeNotification(id));
+        dispatch(deleteNotification(id));
     };
 
     const handleMarkAllRead = () => {
         if (userId) {
-            dispatch(markAllNotificationsRead(userId));
+            dispatch(markAllAsRead(userId));
         }
     };
 
     const handleClearAll = () => {
         if (userId) {
-            dispatch(removeAllNotifications(userId));
+            dispatch(clearAllNotifications(userId));
         }
     };
 
