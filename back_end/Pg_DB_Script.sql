@@ -397,3 +397,23 @@ INSERT INTO public.tbl_purchase_order_files_upload (
 ('PO-2026-007', 'blueprint_bot.png', 'image', 'Blueprint'),
 ('PO-2026-013', 'customs_decl.pdf', 'document', 'Customs Declaration'),
 ('PO-2026-023', 'layout_plan.pdf', 'document', 'Office Layout');
+-- Notifications Table
+CREATE TABLE public.tbl_notifications (
+  "id" SERIAL PRIMARY KEY,
+  "user_id" INT REFERENCES public.users(sno) ON DELETE CASCADE,
+  "title" VARCHAR(200) NOT NULL,
+  "message" TEXT NOT NULL,
+  "type" VARCHAR(50) DEFAULT 'info', -- success, info, warning, error
+  "read" BOOLEAN DEFAULT FALSE,
+  "link" VARCHAR(255),
+  "date" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed Data for Notifications
+INSERT INTO public.tbl_notifications ("user_id", "title", "message", "type", "read", "link", "date") VALUES
+(1, 'New Order Received', 'Order #PO-2024-001 has been submitted for approval.', 'success', false, '/dashboard/PurchaseOrder', '2026-01-21 11:25:11'),
+(1, 'System Maintenance', 'Scheduled maintenance will start in 30 minutes.', 'info', false, NULL, '2026-01-21 11:05:11'),
+(1, 'Approval Pending', 'Purchase Order #8821 requires your approval.', 'warning', false, '/dashboard/PurchaseOrder', '2026-01-21 09:30:11'),
+(1, 'Connection Lost', 'Lost connection to the inventory server. Retrying...', 'error', true, NULL, '2026-01-20 15:30:11'),
+(1, 'Weekly Report Ready', 'Your weekly analytics report is ready for download.', 'success', true, '/dashboard/Reports', '2026-01-20 10:00:00'),
+(2, 'New Order Received', 'Order #PO-2024-002 has been submitted for approval.', 'success', false, '/dashboard/PurchaseOrder', '2026-01-21 11:30:00');

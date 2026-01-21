@@ -6,7 +6,7 @@ const TABLE_USER = 'users';
 const TABLE_DASHBOARD = 'tbl_dashboard';
 const TABLE_PURCHASE_ORDER_HEADER = 'tbl_purchase_order_hdr';
 const TABLE_PURCHASE_ORDER_DETAIL = 'tbl_purchase_order_dtl';
-
+const TABLE_NOTIFICATIONS = 'tbl_notifications';
 
 
 
@@ -185,13 +185,63 @@ export const updateApprovalStatus = async (req: Request, res: Response) => {
                 final_response_person = $2,
                 final_response_remarks = COALESCE($3, final_response_remarks)
             WHERE sno = ANY($4::int[])
-            RETURNING sno, po_ref_no, final_response_status;
+            RETURNING sno as "sno", po_ref_no as "po_ref_no", final_response_status as "status", created_by_user_id as "created_by_user_id";
         `;
 
         const result = await query(updateQuery, [status, userName, remarks || null, ids]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'No records found to update' });
+        }
+
+        // --- Notification Logic ---
+        try {
+            console.log(`Processing ${result.rows.length} notifications map...`);
+            const notifications = result.rows.map(row => {
+                let type = 'info';
+                let title = 'PO Status Update';
+                const poNo = row.po_ref_no;
+                let message = `Your Purchase Order ${poNo} has been updated to ${status}.`;
+
+                if (status === 'APPROVED') {
+                    type = 'success';
+                    title = 'PO Approved';
+                    message = `Great news! Your Purchase Order ${poNo} has been APPROVED.`;
+                } else if (status === 'REJECTED') {
+                    type = 'error';
+                    title = 'PO Rejected';
+                    message = `Attention: Your Purchase Order ${poNo} has been REJECTED.`;
+                } else if (status === 'HOLD') {
+                    type = 'warning';
+                    title = 'PO On Hold';
+                    message = `Your Purchase Order ${poNo} has been put on HOLD.`;
+                }
+
+                return {
+                    user_id: row.created_by_user_id,
+                    title,
+                    message,
+                    type,
+                    link: `/dashboard/po-approval/${row.sno}`,
+                    date: new Date().toISOString()
+                };
+            });
+
+            console.log("Generated Notifications:", notifications);
+
+            for (const n of notifications) {
+                if (n.user_id) {
+                    await query(
+                        `INSERT INTO ${TABLE_NOTIFICATIONS} (user_id, title, message, type, link, date) VALUES ($1, $2, $3, $4, $5, $6)`,
+                        [n.user_id, n.title, n.message, n.type, n.link, n.date]
+                    );
+                    console.log(`Notification sent to User ${n.user_id} for PO ${n.message}`);
+                } else {
+                    console.warn("Skipping notification: created_by_user_id is missing for a PO.");
+                }
+            }
+        } catch (notifError) {
+            console.error('Failed to send notifications:', notifError);
         }
 
         return res.status(200).json({

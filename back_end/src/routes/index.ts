@@ -7,6 +7,7 @@ import ConversationDetail3Route from './PO.ConversationDetail3.Route';
 import FilesUploadDetail4Route from './PO.FilesUploadDetail4.Route';
 import DashboardRoute from './PO.Dashboard.Route';
 import authRoute from './authRoute';
+import NotificationRoute from './Notification.Route';
 
 const Route = Router();
 
@@ -17,5 +18,6 @@ Route.use("/PO/ConversationDetail3", ConversationDetail3Route);
 Route.use("/PO/FilesUploadDetail4", FilesUploadDetail4Route);
 Route.use("/PO/Dashboard", DashboardRoute);
 Route.use("/auth", authRoute);
+Route.use("/notifications", NotificationRoute);
 
 export default Route;

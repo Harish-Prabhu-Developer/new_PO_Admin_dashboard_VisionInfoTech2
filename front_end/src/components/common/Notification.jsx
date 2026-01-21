@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    clearAllNotifications
+    fetchNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    removeNotification,
+    removeAllNotifications
 } from '../../redux/Slice/Notification.Slice';
 import {
     Bell,
@@ -17,14 +18,24 @@ import {
     Trash2,
     Clock
 } from 'lucide-react';
+import { postedTime } from '../../utils/TimeHelper';
 
 const Notification = () => {
     const [isOpen, setIsOpen] = useState(false);
     const notifications = useSelector((state) => state.notification.notifications);
+    const { userData } = useSelector((state) => state.sidebarMenu);
+    const userId = userData?.sno || userData?.id;
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Fetch notifications on mount if userId exists
+    useEffect(() => {
+        if (userId) {
+            dispatch(fetchNotifications(userId));
+        }
+    }, [dispatch, userId]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -42,24 +53,28 @@ const Notification = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     const handleMarkAsRead = (id) => {
-        dispatch(markAsRead(id));
+        dispatch(markNotificationRead(id));
     };
 
     const handleMarkAllAsRead = () => {
-        dispatch(markAllAsRead());
+        if (userId) {
+            dispatch(markAllNotificationsRead(userId));
+        }
     };
 
     const handleDeleteNotification = (id, e) => {
         e.stopPropagation();
-        dispatch(deleteNotification(id));
+        dispatch(removeNotification(id));
     };
 
     const handleClearAll = () => {
-        dispatch(clearAllNotifications());
+        if (userId) {
+            dispatch(removeAllNotifications(userId));
+        }
     };
 
     const handleNotificationClick = (notification) => {
-        dispatch(markAsRead(notification.id));
+        dispatch(markNotificationRead(notification.id));
         setIsOpen(false);
         if (notification.link) {
             navigate(notification.link);
@@ -173,7 +188,7 @@ const Notification = () => {
                                                 </p>
                                                 <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1">
                                                     <Clock size={10} />
-                                                    {notification.time}
+                                                    {postedTime(notification.date)}
                                                 </span>
                                             </div>
                                             <p className={`text-xs mt-0.5 line-clamp-2 ${notification.read ? 'text-slate-500' : 'text-slate-600'}`}>

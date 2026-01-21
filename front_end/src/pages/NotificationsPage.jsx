@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    clearAllNotifications
+    fetchNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    removeNotification,
+    removeAllNotifications
 } from '../redux/Slice/Notification.Slice';
 import {
     Bell,
@@ -20,14 +21,24 @@ import {
     Clock,
     Calendar
 } from 'lucide-react';
+import { postedTime } from '../utils/TimeHelper';
 
 const NotificationsPage = () => {
     const notifications = useSelector((state) => state.notification.notifications);
+    const { userData } = useSelector((state) => state.sidebarMenu);
+    const userId = userData?.sno || userData?.id;
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [filter, setFilter] = useState('all'); // all, unread, read
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Fetch notifications on mount if userId exists
+    React.useEffect(() => {
+        if (userId) {
+            dispatch(fetchNotifications(userId));
+        }
+    }, [dispatch, userId]);
 
     const getTypeStyles = (type) => {
         switch (type) {
@@ -54,26 +65,30 @@ const NotificationsPage = () => {
     });
 
     const handleMarkAsRead = (id) => {
-        dispatch(markAsRead(id));
+        dispatch(markNotificationRead(id));
     };
 
     const handleNotificationClick = (notification) => {
-        dispatch(markAsRead(notification.id));
+        dispatch(markNotificationRead(notification.id));
         if (notification.link) {
             navigate(notification.link);
         }
     };
 
     const handleDeleteNotification = (id) => {
-        dispatch(deleteNotification(id));
+        dispatch(removeNotification(id));
     };
 
     const handleMarkAllRead = () => {
-        dispatch(markAllAsRead());
+        if (userId) {
+            dispatch(markAllNotificationsRead(userId));
+        }
     };
 
     const handleClearAll = () => {
-        dispatch(clearAllNotifications());
+        if (userId) {
+            dispatch(removeAllNotifications(userId));
+        }
     };
 
     return (
@@ -127,8 +142,8 @@ const NotificationsPage = () => {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-4 py-2 rounded-xl text-sm font-medium capitalize whitespace-nowrap transition-all ${filter === f
-                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                                 }`}
                         >
                             {f}
@@ -167,12 +182,8 @@ const NotificationsPage = () => {
                                         </h3>
                                         <div className="flex items-center gap-3 text-xs text-slate-400">
                                             <span className="flex items-center gap-1">
-                                                <Calendar size={12} />
-                                                {notification.date}
-                                            </span>
-                                            <span className="flex items-center gap-1">
                                                 <Clock size={12} />
-                                                {notification.time}
+                                                {postedTime(notification.date)}
                                             </span>
                                         </div>
                                     </div>

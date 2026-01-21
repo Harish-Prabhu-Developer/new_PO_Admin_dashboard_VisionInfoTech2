@@ -1,117 +1,128 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { API_URL } from '../../config';
+
+// Async Thunks
+export const fetchNotifications = createAsyncThunk(
+    'notification/fetchNotifications',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/notifications`, {
+                params: { userId }
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to fetch notifications');
+        }
+    }
+);
+
+export const markNotificationRead = createAsyncThunk(
+    'notification/markAsRead',
+    async (id, { rejectWithValue }) => {
+        try {
+            await axios.put(`${API_URL}/notifications/${id}/read`);
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to mark notification as read');
+        }
+    }
+);
+
+export const markAllNotificationsRead = createAsyncThunk(
+    'notification/markAllAsRead',
+    async (userId, { rejectWithValue }) => {
+        try {
+            await axios.put(`${API_URL}/notifications/mark-all-read`, { userId });
+            return userId;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to mark all notifications as read');
+        }
+    }
+);
+
+export const removeNotification = createAsyncThunk(
+    'notification/deleteNotification',
+    async (id, { rejectWithValue }) => {
+        try {
+            await axios.delete(`${API_URL}/notifications/${id}`);
+            return id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to delete notification');
+        }
+    }
+);
+
+export const removeAllNotifications = createAsyncThunk(
+    'notification/clearAllNotifications',
+    async (userId, { rejectWithValue }) => {
+        try {
+            await axios.delete(`${API_URL}/notifications/clear-all`, { data: { userId } });
+            return userId;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to clear notifications');
+        }
+    }
+);
 
 const initialState = {
-    notifications: [
-        {
-            id: 1,
-            title: 'New Order Received',
-            message: 'Order #PO-2024-001 has been submitted for approval.',
-            time: '5 min ago',
-            date: 'Today',
-            type: 'success',
-            read: false,
-            link: '/dashboard/PurchaseOrder'
-        },
-        {
-            id: 2,
-            title: 'System Maintenance',
-            message: 'Scheduled maintenance will start in 30 minutes.',
-            time: '25 min ago',
-            date: 'Today',
-            type: 'info',
-            read: false,
-        },
-        {
-            id: 3,
-            title: 'Approval Pending',
-            message: 'Purchase Order #8821 requires your approval.',
-            time: '2 hours ago',
-            date: 'Today',
-            type: 'warning',
-            read: false,
-            link: '/dashboard/PurchaseOrder'
-        },
-        {
-            id: 4,
-            title: 'Connection Lost',
-            message: 'Lost connection to the inventory server. Retrying...',
-            time: 'Yesterday',
-            date: 'Yesterday',
-            type: 'error',
-            read: true,
-        },
-        {
-            id: 5,
-            title: 'Weekly Report Ready',
-            message: 'Your weekly analytics report is ready for download.',
-            time: '10:00 AM',
-            date: 'Yesterday',
-            type: 'success',
-            read: true,
-            link: '/dashboard/Reports'
-        },
-        {
-            id: 6,
-            title: 'New User Registered',
-            message: 'A new user "John Doe" has requested access.',
-            time: '09:30 AM',
-            date: 'Yesterday',
-            type: 'info',
-            read: true,
-        },
-        {
-            id: 7,
-            title: 'Server High Load',
-            message: 'CPU usage is above 90% on Server-02.',
-            time: '08:15 AM',
-            date: 'Jan 15',
-            type: 'warning',
-            read: true,
-        }
-    ]
+    notifications: [],
+    isLoading: false,
+    error: null
 };
 
 const notificationSlice = createSlice({
     name: 'notification',
     initialState,
     reducers: {
-        markAsRead: (state, action) => {
-            const id = action.payload;
-            const notification = state.notifications.find(n => n.id === id);
-            if (notification) {
-                notification.read = true;
-            }
-        },
-        markAllAsRead: (state) => {
-            state.notifications.forEach(n => {
-                n.read = true;
-            });
-        },
-        deleteNotification: (state, action) => {
-            const id = action.payload;
-            state.notifications = state.notifications.filter(n => n.id !== id);
-        },
-        clearAllNotifications: (state) => {
-            state.notifications = [];
-        },
-        addNotification: (state, action) => {
+        addLocalNotification: (state, action) => {
             state.notifications.unshift({
                 ...action.payload,
                 id: Date.now(),
                 read: false,
-                time: 'Just now',
-                date: 'Today'
+                date: new Date().toISOString()
             });
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            // Fetch Notifications
+            .addCase(fetchNotifications.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchNotifications.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.notifications = action.payload;
+            })
+            .addCase(fetchNotifications.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload;
+            })
+            // Mark As Read
+            .addCase(markNotificationRead.fulfilled, (state, action) => {
+                const notification = state.notifications.find(n => n.id === action.payload);
+                if (notification) {
+                    notification.read = true;
+                }
+            })
+            // Mark All As Read
+            .addCase(markAllNotificationsRead.fulfilled, (state) => {
+                state.notifications.forEach(n => {
+                    n.read = true;
+                });
+            })
+            // Delete Notification
+            .addCase(removeNotification.fulfilled, (state, action) => {
+                state.notifications = state.notifications.filter(n => n.id !== action.payload);
+            })
+            // Clear All Notifications
+            .addCase(removeAllNotifications.fulfilled, (state) => {
+                state.notifications = [];
+            });
     }
 });
 
-export const {
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    clearAllNotifications,
-    addNotification
-} = notificationSlice.actions;
+export const { addLocalNotification } = notificationSlice.actions;
 
 export default notificationSlice.reducer;
